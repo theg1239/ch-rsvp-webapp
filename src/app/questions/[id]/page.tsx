@@ -5,6 +5,7 @@ import api from "../../../lib/api";
 import type { GetQuestionRes, SubmitResponseRes } from "../../../lib/types";
 import LoadingOverlay from "../../../components/LoadingOverlay";
 import Modal from "../../../components/Modal";
+import { useAuth } from "../../../context/AuthContext";
 
 const MainColors = { orange: "#F5753B", text: "#ffffff", subText: "#cccccc" } as const;
 
@@ -12,6 +13,7 @@ export default function QuestionDetail() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const id = params?.id as string;
+  const { initialized, user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [data, setData] = useState<GetQuestionRes["data"] | null>(null);
@@ -33,8 +35,8 @@ export default function QuestionDetail() {
     } finally { setLoading(false); }
   };
 
-  // Only depend on `id` to avoid recreating `refresh` each render
-  useEffect(() => { if (id) void refresh(); }, [id]);
+  // Fetch only after auth is ready to ensure Authorization header is present
+  useEffect(() => { if (id && initialized && user) void refresh(); }, [id, initialized, user]);
 
   const currentPart = useMemo(() => {
     if (!data || !data.question_parts?.length) return null;
