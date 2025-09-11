@@ -33,7 +33,8 @@ export default function QuestionDetail() {
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { if (id) void refresh(); }, [id, refresh]);
+  // Only depend on `id` to avoid recreating `refresh` each render
+  useEffect(() => { if (id) void refresh(); }, [id]);
 
   const currentPart = useMemo(() => {
     if (!data || !data.question_parts?.length) return null;
