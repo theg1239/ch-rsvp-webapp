@@ -13,18 +13,24 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
+    let first = true;
+    const load = async () => {
       try {
         const res = await api.get<LBRes>("/api/leaderboard/team");
         if (!mounted) return;
         setItems(res.data.team_ranking || []);
         setUserTeam(res.data.user_team || null);
+        setErr(null);
       } catch (e) {
         if (e instanceof Error) setErr(e.message);
         else setErr("Failed to load leaderboard");
-      } finally { setLoading(false); }
-    })();
-    return () => { mounted = false; };
+      } finally {
+        if (first) { setLoading(false); first = false; }
+      }
+    };
+    void load();
+    const id = setInterval(() => { void load(); }, 30_000);
+    return () => { mounted = false; clearInterval(id); };
   }, []);
 
   const top3 = useMemo(() => items.slice(0, 3), [items]);

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type NavItem = { href: string; label: string; icon: string; external?: boolean };
 const items: NavItem[] = [
@@ -20,8 +21,26 @@ export default function NavBar() {
   const path = pathname || "";
   if (path.startsWith("/signin") || path.startsWith("/signup")) return null;
   if (!initialized || !user) return null;
+
+  // Auto-hide on desktop when viewing leaderboard
+  const [autoHidden, setAutoHidden] = useState(false);
+  useEffect(() => {
+    const isLeaderboard = path === "/leaderboard";
+    const isDesktop = typeof window !== "undefined" && window.matchMedia('(min-width: 1024px)').matches;
+    if (!isLeaderboard || !isDesktop) { setAutoHidden(false); return; }
+    let t: ReturnType<typeof setTimeout> | null = null;
+    const schedule = () => {
+      if (t) clearTimeout(t);
+      t = setTimeout(() => setAutoHidden(true), 5000);
+    };
+    const onMove = () => { setAutoHidden(false); schedule(); };
+    schedule();
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('keydown', onMove);
+    return () => { if (t) clearTimeout(t); window.removeEventListener('mousemove', onMove); window.removeEventListener('keydown', onMove); };
+  }, [path]);
   return (
-    <nav className="fixed nav-safe-offset left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4" aria-label="Primary">
+    <nav className={`fixed nav-safe-offset left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4 transition-opacity duration-300 ${autoHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} aria-label="Primary">
       <div className="rounded-2xl py-2 ch-card ch-glass relative">
         {/* Horizontal scroll container on mobile; evenly spaced on larger screens */}
   <div className="flex items-center gap-2 px-3 overflow-x-auto scroll-x no-scrollbar touch-pan-x scroll-smooth sm:overflow-visible sm:no-scrollbar sm:justify-between sm:gap-3" style={{ WebkitOverflowScrolling: 'touch' }}>
