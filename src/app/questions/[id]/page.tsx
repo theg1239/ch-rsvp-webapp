@@ -91,7 +91,7 @@ export default function QuestionDetail() {
 
       </div>
       <LoadingOverlay show={busy} label="Submitting..." />
-      <Modal open={showSuccess} onClose={()=>setShowSuccess(false)} title="Correct ✅" success>
+      <Modal open={showSuccess} onClose={()=>setShowSuccess(false)} title="Submitted ✅" success>
         <p className="font-area ch-text">{points != null ? (<span>You earned <span className="font-qurova" style={{ color:'#22c55e' }}>+{points}</span> points.</span>) : 'Submitted successfully.'}</p>
       </Modal>
       <Modal open={showIncorrect} onClose={()=>setShowIncorrect(false)} title="Try again">
