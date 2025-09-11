@@ -49,13 +49,25 @@ export default function QuestionDetail() {
       const normalized = answer.replace(/\s+/g, "").toUpperCase();
       const payload: { type: string; data: string; question_part_id: string } = { type: "STRING", data: normalized, question_part_id: currentPart.id };
       const res = await api.post<SubmitResponseRes>("/api/response/", payload);
-      const ptsRaw = (res as unknown as { data?: { points?: number | string } }).data?.points;
-      const ptsNum = typeof ptsRaw === 'number' ? ptsRaw : (typeof ptsRaw === 'string' ? Number.parseInt(ptsRaw, 10) : null);
-      setPoints(Number.isFinite(ptsNum as number) ? (ptsNum as number) : null);
-      setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Submitted.");
-      setAnswer("");
-      await refresh();
-      setShowSuccess(true);
+      const topMsg: string | undefined = (res as unknown as { message?: string }).message;
+      const rData: unknown = (res as unknown as { data?: unknown }).data;
+      const responseObj: unknown = (rData as { response?: unknown } | undefined)?.response;
+      const isCorrect: boolean = typeof responseObj === 'object' && responseObj !== null && (responseObj as { is_correct?: boolean }).is_correct === true;
+
+      if (!isCorrect) {
+        // Incorrect submission: show the backend message in the error modal
+        setSubmitMsg(topMsg || "Incorrect answer.");
+        setShowIncorrect(true);
+      } else {
+        // Correct submission: parse and show points
+        const ptsRaw = (rData as { points?: number | string } | undefined)?.points;
+        const ptsNum = typeof ptsRaw === 'number' ? ptsRaw : (typeof ptsRaw === 'string' ? Number.parseInt(ptsRaw, 10) : null);
+        setPoints(Number.isFinite(ptsNum as number) ? (ptsNum as number) : null);
+        setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Submitted.");
+        setAnswer("");
+        await refresh();
+        setShowSuccess(true);
+      }
     } catch (e) {
       setSubmitMsg(e instanceof Error ? e.message : "Incorrect or already solved.");
       setShowIncorrect(true);
@@ -95,7 +107,7 @@ export default function QuestionDetail() {
         <p className="font-area ch-text">{points != null ? (<span>You earned <span className="font-qurova" style={{ color:'#22c55e' }}>+{points}</span> points.</span>) : 'Submitted successfully.'}</p>
       </Modal>
       <Modal open={showIncorrect} onClose={()=>setShowIncorrect(false)} title="Try again">
-        <p className="font-area ch-text">That doesn&apos;t match. Check the question again! Ensure no spaces in the answer.</p>
+        <p className="font-area ch-text">{submitMsg || "That doesn’t match. Check the question again! Ensure no spaces in the answer."}</p>
       </Modal>
     </div>
   );

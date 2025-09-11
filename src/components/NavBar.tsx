@@ -24,7 +24,7 @@ export default function NavBar() {
     <nav className="fixed nav-safe-offset left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4" aria-label="Primary">
       <div className="rounded-2xl py-2 ch-card ch-glass relative">
         {/* Horizontal scroll container on mobile; evenly spaced on larger screens */}
-        <div className="flex items-center gap-2 px-3 overflow-x-auto scroll-x no-scrollbar sm:overflow-visible sm:no-scrollbar sm:justify-between sm:gap-3">
+  <div className="flex items-center gap-2 px-3 overflow-x-auto scroll-x no-scrollbar touch-pan-x scroll-smooth sm:overflow-visible sm:no-scrollbar sm:justify-between sm:gap-3" style={{ WebkitOverflowScrolling: 'touch' }}>
           {items.map((it) => {
             // Highlight only real route matches
             const active = (!it.external && pathname === it.href);
