@@ -91,7 +91,7 @@ export default function QuestionDetail() {
         <p className="font-area ch-text">You earned <span className="font-qurova" style={{ color:'#22c55e' }}>+{points ?? 0}</span> points.</p>
       </Modal>
       <Modal open={showIncorrect} onClose={()=>setShowIncorrect(false)} title="Try again">
-        <p className="font-area ch-text">That doesn’t match. Check the hint or re-read the prompt.</p>
+        <p className="font-area ch-text">That doesn&apos;t match. Check the question again! Ensure no spaces in the answer.</p>
       </Modal>
     </div>
   );
