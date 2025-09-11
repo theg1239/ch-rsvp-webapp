@@ -77,7 +77,7 @@ export default function QuestionDetail() {
 
         {currentPart && (
           <div className="grid gap-4">
-            <div className="rounded-2xl p-4 ch-card">
+            <div className="rounded-2xl p-4 ch-card question-content">
               <PartContent part={currentPart} />
             </div>
             <div className="grid gap-2">

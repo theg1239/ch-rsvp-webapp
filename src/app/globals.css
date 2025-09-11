@@ -151,8 +151,18 @@ body {
 .snap-x { scroll-snap-type: x mandatory; }
 .snap-center { scroll-snap-align: center; }
 
+/* Hide scrollbars for specific scroll containers (mobile nav) */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Image content inside question parts */
-.ch-img { width: 100%; height: auto; border-radius: 0.75rem; }
+.ch-img { width: 100%; height: auto; border-radius: 0.75rem; display: block; }
+
+/* Ensure oversized question content doesn't break layout */
+.question-content { max-height: min(65vh, 680px); overflow: auto; -webkit-overflow-scrolling: touch; }
+.question-content img, .question-content video { max-width: 100%; height: auto; object-fit: contain; }
+.question-content .ch-img { max-height: min(60vh, 560px); object-fit: contain; }
+.question-content p, .question-content a, .question-content span, .question-content div { overflow-wrap: anywhere; word-break: break-word; }
 
 /* Auth hero (six-owls) with responsive crop; larger and higher on desktop */
 .auth-hero { position: relative; overflow: hidden; height: clamp(200px, 38vh, 340px); }

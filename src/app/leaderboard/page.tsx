@@ -28,7 +28,8 @@ export default function LeaderboardPage() {
   }, []);
 
   const top3 = useMemo(() => items.slice(0, 3), [items]);
-  const list = useMemo(() => items.slice(3, 10), [items]);
+  // Show all remaining items and let the page scroll
+  const list = useMemo(() => items.slice(3), [items]);
 
   return (
     <div className="min-h-dvh ch-bg relative">
