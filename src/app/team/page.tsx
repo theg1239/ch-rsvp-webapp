@@ -5,6 +5,11 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../lib/api";
 import type { ApiOk, ProfileData } from "../../lib/types";
 
+declare class BarcodeDetector {
+  constructor(options?: { formats?: string[] });
+  detect(video: HTMLVideoElement): Promise<Array<{ rawValue: string }>>;
+}
+
 const MainColors = {
   background: "#241f1a",
   orange: "#F5753B",
@@ -275,7 +280,7 @@ function QRScanModal({ onClose, onResult }: { onClose: () => void; onResult: (te
         <div className="grid gap-2">
           <video id="qr-video" playsInline muted className="w-full rounded-lg bg-black" style={{ aspectRatio: '4 / 3' }} />
           {error && <p className="font-area text-sm text-red-400">{error}</p>}
-          <p className="font-area ch-subtext text-xs">Point camera at your teammate’s QR code.</p>
+          <p className="font-area ch-subtext text-xs">Point camera at your teammates QR code.</p>
         </div>
       </div>
     </div>
