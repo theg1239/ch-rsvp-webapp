@@ -83,6 +83,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [scanOpen, setScanOpen] = useState(false);
 
   const createTeam = async () => {
     setErr(null);
@@ -101,9 +102,14 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
   const joinTeam = async () => {
     setErr(null);
     if (!code.trim()) return setErr("Team code is required");
+    await joinWithCode(code.trim());
+  };
+
+  const joinWithCode = async (c: string) => {
     setBusy("Joining team…");
+    setErr(null);
     try {
-      await api.post<ApiOk<unknown>>("/api/user/team/join", { code });
+      await api.post<ApiOk<unknown>>("/api/user/team/join", { code: c });
       router.push("/questions");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Failed to join team");
@@ -138,7 +144,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
           <div className="flex-1 h-px" style={{ backgroundColor: MainColors.subText }} />
         </div>
         <div className="w-full flex items-center justify-center">
-          <button className="rounded-full px-8 py-3 bg-white flex items-center gap-3" type="button">
+          <button className="rounded-full px-8 py-3 bg-white flex items-center gap-3" type="button" onClick={()=>setScanOpen(true)}>
             <img src="/Images/JoinPage/scanning.svg" alt="scan" className="w-5 h-5" />
             <span className="font-area" style={{ color: '#2C2824' }}>Join using QR</span>
           </button>
@@ -147,6 +153,10 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
 
       {busy && <p className="text-sm" style={{ color: MainColors.subText }}>{busy}</p>}
       {err && <p className="text-sm text-red-400">{err}</p>}
+
+      {scanOpen && (
+        <QRScanModal onClose={()=>setScanOpen(false)} onResult={(val)=>{ setScanOpen(false); const m = (val||'').match(/[A-Z0-9]{6}/i); if (m) { void joinWithCode(m[0].toUpperCase()); } else { setErr('Invalid QR content'); } }} />
+      )}
     </div>
   );
 }
@@ -155,12 +165,15 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
   const team = data.user.team as ProfileData["user"]["team"];
   const [leaving, setLeaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const router = useRouter();
 
   const leave = async () => {
     setErr(null);
     setLeaving(true);
     try {
       await api.post<ApiOk<unknown>>("/api/profile/leave_team", {});
+      // Route to profile to clearly indicate no team; profile links back to team
+      router.replace('/profile');
       onLeft();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Failed to leave team");
@@ -202,6 +215,69 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
       </div>
 
       {err && <p className="text-sm text-red-400">{err}</p>}
+    </div>
+  );
+}
+
+function QRScanModal({ onClose, onResult }: { onClose: () => void; onResult: (text: string) => void }) {
+  const videoRef = useState<HTMLVideoElement | null>(null)[0] as any;
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    const start = async () => {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+        if (!active) return;
+        setStream(s);
+        const v = (document.getElementById('qr-video') as HTMLVideoElement);
+        if (v) {
+          v.srcObject = s;
+          await v.play();
+        }
+        // Try BarcodeDetector
+        const AnyBD = (window as any).BarcodeDetector;
+        if (AnyBD) {
+          const detector = new AnyBD({ formats: ['qr_code'] });
+          const scan = async () => {
+            if (!active) return;
+            try {
+              const res = await detector.detect(v);
+              if (res && res[0]?.rawValue) {
+                onResult(res[0].rawValue as string);
+                return;
+              }
+            } catch {}
+            requestAnimationFrame(scan);
+          };
+          requestAnimationFrame(scan);
+        } else {
+          setError('QR scanning not supported in this browser. Use code input.');
+        }
+      } catch (e) {
+        setError('Camera access denied. Use code input instead.');
+      }
+    };
+    void start();
+    return () => {
+      active = false;
+      if (stream) stream.getTracks().forEach(t => t.stop());
+    };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter:'blur(2px)' }}>
+      <div className="rounded-2xl p-4 ch-card" style={{ width: 'min(560px, 96vw)' }}>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-qurova ch-text text-lg">Scan QR</h3>
+          <button onClick={onClose} className="font-qurova text-sm" style={{ color:'var(--ch-subtext)' }}>Close</button>
+        </div>
+        <div className="grid gap-2">
+          <video id="qr-video" playsInline muted className="w-full rounded-lg bg-black" style={{ aspectRatio: '4 / 3' }} />
+          {error && <p className="font-area text-sm text-red-400">{error}</p>}
+          <p className="font-area ch-subtext text-xs">Point camera at your teammate’s QR code.</p>
+        </div>
+      </div>
     </div>
   );
 }

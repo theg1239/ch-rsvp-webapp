@@ -9,7 +9,7 @@ import api from "../lib/api";
 import type { ApiOk, ProfileData } from "../lib/types";
 
 export default function Home() {
-  const { user, initialized } = useAuth();
+  const { user, initialized, signOut } = useAuth();
   const router = useRouter();
   const [teamName, setTeamName] = useState<string | null>(null);
   const [teamCode, setTeamCode] = useState<string | null>(null);
@@ -22,12 +22,17 @@ export default function Home() {
       try {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;
-  const t = (res.data as ProfileData).user?.team;
+        const t = (res.data as ProfileData).user?.team;
         if (t) { setTeamName(t.name); setTeamCode(t.code); }
-      } catch {}
+        else { router.replace("/team"); }
+      } catch (e) {
+        // Backend sends 400 when not in any team
+        const msg = e instanceof Error ? e.message : "";
+        if (msg.includes("User is not part of any team") || msg.includes("400")) router.replace("/team");
+      }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [router]);
 
   if (!initialized) return null;
   if (!user) return null;
@@ -38,9 +43,20 @@ export default function Home() {
       <img src="/Images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
 
       <div className="relative ch-container py-12 pb-28 safe-bottom">
-        <header className="text-center">
-          <h1 className="font-qurova ch-gradient-text ch-h1">CH RSVP</h1>
-          <p className="mt-1 font-area ch-subtext">Plan, assemble, and get ready to hunt.</p>
+        <header className="flex items-center justify-between">
+          <div className="text-center flex-1">
+            <h1 className="font-qurova ch-gradient-text ch-h1">CH RSVP</h1>
+            <p className="mt-1 font-area ch-subtext">Plan, assemble, and get ready to hunt.</p>
+          </div>
+          <div className="absolute right-6 top-12 sm:static sm:right-0 sm:top-0">
+            <button
+              onClick={async ()=>{ try { await signOut(); } finally { router.replace('/signin'); } }}
+              className="px-4 py-2 rounded-xl font-qurova"
+              style={{ border: '2px solid var(--ch-orange)' }}
+            >
+              Logout
+            </button>
+          </div>
         </header>
 
         <section className="mt-8 grid gap-6">

@@ -2,6 +2,8 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
+import api from "../../../lib/api";
+import type { ApiOk, ProfileData } from "../../../lib/types";
 
 const MainColors = { background: "#241f1a", orange: "#F5753B", text: "#ffffff", subText: "#cccccc" } as const;
 
@@ -11,7 +13,14 @@ export default function SignInPage() {
 
   const handleSignIn = async () => {
     await signInWithGoogle();
-    router.push("/");
+    try {
+      const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
+      const team = (res.data as ProfileData)?.user?.team;
+      router.push(team ? "/questions" : "/team");
+    } catch {
+      // If profile fetch fails or no team, guide user to team onboarding
+      router.push("/team");
+    }
   };
 
   return (
