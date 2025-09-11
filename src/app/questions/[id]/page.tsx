@@ -45,10 +45,13 @@ export default function QuestionDetail() {
     if (!currentPart) return;
     setSubmitMsg(null); setPoints(null); setBusy(true);
     try {
-  const payload: { type: string; data: string; question_part_id: string } = { type: "STRING", data: answer.trim().toUpperCase(), question_part_id: currentPart.id };
+      // Normalize answer: remove ALL whitespace and uppercase
+      const normalized = answer.replace(/\s+/g, "").toUpperCase();
+      const payload: { type: string; data: string; question_part_id: string } = { type: "STRING", data: normalized, question_part_id: currentPart.id };
       const res = await api.post<SubmitResponseRes>("/api/response/", payload);
-      setPoints(res.data.points);
-      setSubmitMsg("Correct! Points awarded.");
+      const pts = (res as unknown as { data?: { points?: number } }).data?.points;
+      setPoints(typeof pts === 'number' ? pts : null);
+      setSubmitMsg(typeof pts === 'number' ? "Correct! Points awarded." : "Submitted.");
       setAnswer("");
       await refresh();
       setShowSuccess(true);
