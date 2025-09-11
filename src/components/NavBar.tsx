@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type NavItem = { href: string; label: string; icon: string; external?: boolean };
 const items: NavItem[] = [
@@ -16,13 +17,10 @@ import { useAuth } from "../context/AuthContext";
 
 export default function NavBar() {
   const pathname = usePathname();
-  const { user, initialized } = useAuth();
-  // Hide on auth routes regardless of auth state
   const path = pathname || "";
-  if (path.startsWith("/signin") || path.startsWith("/signup")) return null;
-  if (!initialized || !user) return null;
+  const { user, initialized } = useAuth();
 
-  // Auto-hide on desktop when viewing leaderboard
+  // Auto-hide on desktop when viewing leaderboard (hooks must run unconditionally)
   const [autoHidden, setAutoHidden] = useState(false);
   useEffect(() => {
     const isLeaderboard = path === "/leaderboard";
@@ -39,6 +37,10 @@ export default function NavBar() {
     window.addEventListener('keydown', onMove);
     return () => { if (t) clearTimeout(t); window.removeEventListener('mousemove', onMove); window.removeEventListener('keydown', onMove); };
   }, [path]);
+
+  // Hide on auth routes regardless of auth state (after hooks)
+  if (path.startsWith("/signin") || path.startsWith("/signup")) return null;
+  if (!initialized || !user) return null;
   return (
     <nav className={`fixed nav-safe-offset left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4 transition-opacity duration-300 ${autoHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} aria-label="Primary">
       <div className="rounded-2xl py-2 ch-card ch-glass relative">
@@ -52,8 +54,8 @@ export default function NavBar() {
                 <img src={it.icon} alt={it.label} className={`w-[22px] h-[22px] nav-icon ${active ? 'active' : ''}`} />
                 <span className="text-[11px] mt-0.5" style={{ color: active ? '#F5753B' : '#ccc' }}>{it.label}</span>
                 {active && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 ch-gradient" />}
-              </>
-            );
+            </>
+          );
 
             return it.external ? (
               <a key={it.href} href={it.href} target="_blank" rel="noopener noreferrer"
@@ -71,7 +73,7 @@ export default function NavBar() {
         {/* Right fade and arrow hint on small screens */}
         <div className="pointer-events-none absolute inset-y-0 right-1 flex items-center sm:hidden">
           <div className="h-8 w-6 mr-1 rounded-l-xl" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(36,31,26,0.75) 80%)' }} />
-          <img src="/images/QuestionsPage/left-arrow.svg" aria-hidden className="rotate-180 w-4 h-4 opacity-75 animate-pulse" />
+          <Image src="/images/QuestionsPage/left-arrow.svg" alt="scroll" width={16} height={16} className="rotate-180 w-4 h-4 opacity-75 animate-pulse" />
         </div>
       </div>
     </nav>
