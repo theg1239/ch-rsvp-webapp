@@ -19,13 +19,13 @@ export type MainPhaseActive = {
   };
 };
 
-export type MainGeneric = { status: string; message: string; data?: any };
+export type MainGeneric = { status: string; message: string; data?: Record<string, unknown> };
 
 export type GetQuestionRes = ApiOk<{
   question_name: string;
-  question_parts: Array<{ id: string; content: any[] }>;
+  question_parts: Array<{ id: string; content: Array<string | { type?: string; data?: string; text?: string; url?: string }> }>;
   question_parts_count: number;
   difficulty: string;
 }>;
 
-export type SubmitResponseRes = ApiOk<{ response: any; points: number }>;
+export type SubmitResponseRes = ApiOk<{ response: string | Record<string, unknown>; points: number }>;

@@ -22,8 +22,8 @@ export default function ProfilePage() {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;
         setData(res.data);
-      } catch (e: any) {
-        const msg = e?.message || "Failed to fetch profile";
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to fetch profile";
         if (msg.includes('User is not part of any team') || msg.includes('400')) {
           setNotInTeam(true);
         } else {

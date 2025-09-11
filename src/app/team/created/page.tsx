@@ -20,7 +20,7 @@ export default function TeamCreatedPage() {
       try {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;
-        const t = (res.data as any).user?.team;
+  const t = (res.data as ProfileData).user?.team;
         if (t) {
           setTeamName(t.name ?? "");
           setTeamCode(t.code ?? "");
@@ -36,18 +36,18 @@ export default function TeamCreatedPage() {
 
   const share = async () => {
     const message = `Join my squad on Cryptic Hunt: ${teamCode}`;
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
-      try { await (navigator as any).share({ text: message }); } catch {}
+    if (typeof navigator !== "undefined" && 'share' in navigator) {
+      try { await (navigator as Navigator & { share?: (data: { text: string }) => Promise<void> }).share?.({ text: message }); } catch {}
       return;
     }
     try {
-      await navigator.clipboard.writeText(message);
+      await (navigator as Navigator & { clipboard: Clipboard }).clipboard.writeText(message);
       setCopyOk(true); setTimeout(() => setCopyOk(false), 2000);
     } catch {}
   };
 
   const copyCode = async () => {
-    try { await navigator.clipboard.writeText(teamCode); setCopyOk(true); setTimeout(() => setCopyOk(false), 2000); } catch {}
+  try { await (navigator as Navigator & { clipboard: Clipboard }).clipboard.writeText(teamCode); setCopyOk(true); setTimeout(() => setCopyOk(false), 2000); } catch {}
   };
 
   return (

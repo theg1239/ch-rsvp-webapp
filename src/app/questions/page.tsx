@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import api from "../../lib/api";
-import type { MainPhaseActive, MainGeneric } from "../../lib/types";
+import type { MainGeneric } from "../../lib/types";
 import { useAuth } from "../../context/AuthContext";
 
 export default function QuestionsIndex() {
@@ -22,15 +23,16 @@ export default function QuestionsIndex() {
       try {
         const res = await api.get<MainGeneric>("/api/main");
         if (!mounted) return;
-        if (res.message === "PHASE_ACTIVE" && (res as any).data?.questions) {
-          const data = (res as any).data || {};
+        if (res.message === "PHASE_ACTIVE" && (res.data as MainGeneric["data"] & { questions?: Array<{ id: string; name: string; difficulty?: { level?: string } }>; solved_questions?: Array<{ id: string; name: string; difficulty?: { level?: string } }> }).questions) {
+          const data = res.data as MainGeneric["data"] & { questions?: Array<{ id: string; name: string; difficulty?: { level?: string } }>; solved_questions?: Array<{ id: string; name: string; difficulty?: { level?: string } }> } || {};
           setQuestions(data.questions || []);
           setSolved(data.solved_questions || []);
         } else {
           setNote(`Status: ${res.message}. You can still open a question directly if you know its id.`);
         }
-      } catch (e: any) {
-        setErr(e?.message || "Failed to load questions");
+      } catch (e) {
+        if (e instanceof Error) setErr(e.message);
+        else setErr("Failed to load questions");
       } finally { setLoading(false); }
     })();
     return () => { mounted = false; };
@@ -41,7 +43,7 @@ export default function QuestionsIndex() {
       <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
       <div className="relative max-w-3xl mx-auto px-6 py-10">
         <div className="flex items-center gap-3 mb-6">
-          <img src="/Images/QuestionsPage/refresh.svg" alt="refresh" className="w-5 h-5 opacity-80" onClick={() => location.reload()} />
+          <Image src="/Images/QuestionsPage/refresh.svg" alt="refresh" width={20} height={20} className="w-5 h-5 opacity-80" onClick={() => location.reload()} />
           <h1 className="font-qurova ch-gradient-text" style={{ fontSize: 28 }}>Questions</h1>
         </div>
         {loading && <p className="font-area ch-subtext">Loading…</p>}

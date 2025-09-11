@@ -31,8 +31,8 @@ export default function TeamPage() {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;
         setState({ loading: false, data: res.data, notInTeam: false, error: null });
-      } catch (e: any) {
-        const msg = e?.message || "Failed to fetch profile";
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to fetch profile";
         // Backend returns 400 when user is not part of any team
         if (msg.includes("User is not part of any team") || msg.includes("400")) {
           setState({ loading: false, data: null, notInTeam: true, error: null });
@@ -91,8 +91,8 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
     try {
       await api.post<ApiOk<string>>("/api/user/team/create", { name });
       router.push("/questions");
-    } catch (e: any) {
-      setErr(e?.message || "Failed to create team");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Failed to create team");
     } finally {
       setBusy(null);
     }
@@ -105,8 +105,8 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
     try {
       await api.post<ApiOk<unknown>>("/api/user/team/join", { code });
       router.push("/questions");
-    } catch (e: any) {
-      setErr(e?.message || "Failed to join team");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Failed to join team");
     } finally {
       setBusy(null);
     }
@@ -152,7 +152,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
 }
 
 function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | null; onLeft: () => void }) {
-  const team = data.user.team as any;
+  const team = data.user.team as ProfileData["user"]["team"];
   const [leaving, setLeaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -162,8 +162,8 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
     try {
       await api.post<ApiOk<unknown>>("/api/profile/leave_team", {});
       onLeft();
-    } catch (e: any) {
-      setErr(e?.message || "Failed to leave team");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Failed to leave team");
     } finally {
       setLeaving(false);
     }
@@ -179,7 +179,7 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
       <div className="grid gap-2">
         <h3 className="font-qurova ch-gradient-text">Members</h3>
         <ul className="list-disc pl-5 font-area ch-text">
-          {team?.users?.map((u: any, idx: number) => (
+          {team?.users?.map((u, idx: number) => (
             <li key={idx}>{u.name || u.email}</li>
           ))}
         </ul>

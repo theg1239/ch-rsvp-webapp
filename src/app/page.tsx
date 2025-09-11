@@ -22,7 +22,7 @@ export default function Home() {
       try {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;
-        const t = (res.data as any).user?.team;
+  const t = (res.data as ProfileData).user?.team;
         if (t) { setTeamName(t.name); setTeamCode(t.code); }
       } catch {}
     })();

@@ -18,7 +18,7 @@ export default function SquadLobbyPage() {
       try {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;
-        const user = res.data.user as any;
+  const user = res.data.user as ProfileData["user"];
         const t = user?.team;
         setTeamName(t?.name ?? "—");
         setTeamCode(t?.code ?? "—");
@@ -111,7 +111,7 @@ function Grid({ slots }: { slots: Slot[] }) {
 }
 
 function SlotBox({ s }: { s: Slot }) {
-  const baseStyle: any = {
+  const baseStyle: React.CSSProperties = {
     height: 72,
     width: 72,
     borderRadius: 18,

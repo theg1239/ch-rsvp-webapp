@@ -19,8 +19,9 @@ export default function LeaderboardPage() {
         if (!mounted) return;
         setItems(res.data.team_ranking || []);
         setUserTeam(res.data.user_team || null);
-      } catch (e: any) {
-        setErr(e?.message || "Failed to load leaderboard");
+      } catch (e) {
+        if (e instanceof Error) setErr(e.message);
+        else setErr("Failed to load leaderboard");
       } finally { setLoading(false); }
     })();
     return () => { mounted = false; };

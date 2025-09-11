@@ -28,12 +28,12 @@ export default function QuestionDetail() {
     try {
       const res = await api.get<GetQuestionRes>(`/api/questions/${id}`);
       setData(res.data);
-    } catch (e: any) {
-      setErr(e?.message || "Failed to fetch question");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Failed to fetch question");
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { if (id) void refresh(); }, [id]);
+  useEffect(() => { if (id) void refresh(); }, [id, refresh]);
 
   const currentPart = useMemo(() => {
     if (!data || !data.question_parts?.length) return null;
@@ -44,15 +44,15 @@ export default function QuestionDetail() {
     if (!currentPart) return;
     setSubmitMsg(null); setPoints(null); setBusy(true);
     try {
-      const payload = { type: "STRING", data: answer.trim().toUpperCase(), question_part_id: currentPart.id } as any;
+  const payload: { type: string; data: string; question_part_id: string } = { type: "STRING", data: answer.trim().toUpperCase(), question_part_id: currentPart.id };
       const res = await api.post<SubmitResponseRes>("/api/response/", payload);
       setPoints(res.data.points);
       setSubmitMsg("Correct! Points awarded.");
       setAnswer("");
       await refresh();
       setShowSuccess(true);
-    } catch (e: any) {
-      setSubmitMsg(e?.message || "Incorrect or already solved.");
+    } catch (e) {
+      setSubmitMsg(e instanceof Error ? e.message : "Incorrect or already solved.");
       setShowIncorrect(true);
     } finally { setBusy(false); }
   };
@@ -96,20 +96,20 @@ export default function QuestionDetail() {
   );
 }
 
-function PartContent({ part }: { part: { id: string; content: any[] } }) {
+function PartContent({ part }: { part: { id: string; content: Array<string | { type?: string; data?: string; text?: string; url?: string }> } }) {
   const isImageUrl = (s: string) => /\.(png|jpe?g|gif|svg|webp)(\?.*)?$/i.test(s) || s.startsWith('data:image') || s.startsWith('http') && /(\/(png|jpe?g|gif|svg|webp))/.test(s);
-  const normType = (t: any) => (typeof t === 'string' ? t.toLowerCase() : '');
+  const normType = (t: unknown) => (typeof t === 'string' ? t.toLowerCase() : '');
 
   return (
     <div className="rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.25)' }}>
       <div className="grid gap-3">
-        {Array.isArray(part.content) && part.content.map((c: any, idx: number) => {
+        {Array.isArray(part.content) && part.content.map((c, idx) => {
           // Handle both object and string content
           if (typeof c === 'string') {
             return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{c}</p>;
           }
-          const t = normType(c?.type || c?.Type);
-          const data: string | undefined = c?.data ?? c?.text ?? c?.url ?? c?.Data;
+          const t = normType((c as { type?: string }).type);
+          const data: string | undefined = (c as { data?: string; text?: string; url?: string }).data ?? (c as { text?: string }).text ?? (c as { url?: string }).url;
           // Image
           if (data && (t.includes('image') || isImageUrl(data))) {
             return <img key={idx} src={data} alt="content" className="rounded max-w-full" />;
