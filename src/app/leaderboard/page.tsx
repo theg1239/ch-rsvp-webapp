@@ -51,8 +51,8 @@ export default function LeaderboardPage() {
 
         {!loading && !err && (
           <>
-            {/* Podium: scrollable on small screens, centered on md+ */}
-            <div className="flex items-end justify-center gap-6 mb-10 scroll-x snap-x md:snap-none">
+            {/* Podium: left-aligned + horizontally scrollable on mobile, centered on md+ */}
+            <div className="flex items-end gap-6 mb-10 scroll-x snap-x md:snap-none md:justify-center -mx-4 px-4">
               {top3[1] ? <Podium place={2} item={top3[1]} /> : <div className="w-40 shrink-0" />}
               {top3[0] ? <Podium place={1} item={top3[0]} /> : <div className="w-40 shrink-0" />}
               {top3[2] ? <Podium place={3} item={top3[2]} /> : <div className="w-40 shrink-0" />}
