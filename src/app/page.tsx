@@ -73,7 +73,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="rounded-2xl p-6 ch-card">
+          {/* <div className="rounded-2xl p-6 ch-card">
             <h3 className="font-qurova ch-text text-lg">App Status</h3>
             <div className="mt-2"><MainStatus /></div>
             {teamCode && (
@@ -82,7 +82,7 @@ export default function Home() {
             <div className="mt-4 flex gap-3">
               <Link href="/questions" className="px-5 py-3 rounded-xl font-qurova ch-btn">Questions</Link>
             </div>
-          </div>
+          </div> */}
           
           {/* Banner row (boarding banner thingy) */}
           <div className="rounded-2xl p-6 flex items-center gap-4 ch-card">
