@@ -52,8 +52,8 @@ export default function TeamCreatedPage() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <img src="/Images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <img src="/images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
 
       <div className="relative ch-container ch-container-narrow pt-10 pb-12 safe-bottom">
         <div className="text-center mb-6">
@@ -67,7 +67,7 @@ export default function TeamCreatedPage() {
             <div style={{ width: 25, height: 20 }} />
             <p className="flex-1 text-center font-qurova ch-text" style={{ fontSize: 20 }}>{teamCode || ""}</p>
             <button onClick={copyCode} className="p-1" aria-label="Copy code">
-              <img src="/Images/copyIcon.svg" alt="copy" className="w-5 h-5" />
+              <img src="/images/copyIcon.svg" alt="copy" className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -75,7 +75,7 @@ export default function TeamCreatedPage() {
         <Divider />
         <div className="w-full flex justify-center mb-2">
           <button onClick={share} className="flex items-center gap-2 px-4 py-2 rounded" style={{ background: 'transparent' }}>
-            <img src="/Images/WhatsAppIcon.svg" alt="wa" className="w-5 h-5" />
+            <img src="/images/WhatsAppIcon.svg" alt="wa" className="w-5 h-5" />
             <span className="font-area ch-text" style={{ fontSize: 14 }}>Share code with your Teammates</span>
           </button>
         </div>

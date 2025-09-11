@@ -40,7 +40,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
       <div className="relative ch-container ch-container-narrow py-10 safe-bottom">
         <header className="text-center mb-6">
           <h1 className="font-qurova ch-orange ch-h1">Profile</h1>

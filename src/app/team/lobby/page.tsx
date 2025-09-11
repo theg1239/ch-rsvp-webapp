@@ -35,7 +35,7 @@ export default function SquadLobbyPage() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
       <div className="relative ch-container ch-container-narrow pt-10 pb-12 safe-bottom">
         <header className="text-center">
           <h1 className="font-qurova ch-text ch-h3">cryptic hunt</h1>

@@ -25,8 +25,8 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <img src="/Images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <img src="/images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
 
       <div className="relative ch-container ch-container-narrow pt-12 pb-36 safe-bottom">
         <header className="text-center">
@@ -43,7 +43,7 @@ export default function SignInPage() {
 
         {/* Mobile/desktop hero (six owls), cropped; larger + higher on desktop */}
           <div className="auth-hero">
-            <img src="/Images/six-owls.svg" alt="Six owls" />
+            <img src="/images/six-owls.svg" alt="Six owls" />
           </div>
 
         <section className="mt-10">
@@ -63,7 +63,7 @@ export default function SignInPage() {
             onClick={handleSignIn}
             className="w-full h-12 rounded-xl flex items-center justify-center gap-3 btn-ripple ch-btn"
           >
-            <Image src="/Images/google-logo.svg" alt="Google" width={20} height={20} />
+            <Image src="/images/google-logo.svg" alt="Google" width={20} height={20} />
             <span className="font-qurova">Log in with Google</span>
           </button>
         </div>

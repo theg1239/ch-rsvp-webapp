@@ -32,7 +32,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
       <div className="relative ch-container py-10 pb-28 safe-bottom">
         <header className="text-center mb-8">
           <h1 className="font-qurova ch-gradient-text ch-h1">cryptic hunt</h1>
@@ -79,8 +79,8 @@ function Podium({ place, item }: { place: 1 | 2 | 3; item: LBItem }) {
   return (
     <div className="flex flex-col items-center snap-center shrink-0" style={{ width: 'clamp(140px, 45vw, 180px)' }}>
       <div className="w-full rounded-2xl flex flex-col items-center justify-end" style={{ height, background: gradients[place] }}>
-        <img src={place === 1 ? "/Images/LeaderBoard/first.svg" : place === 2 ? "/Images/LeaderBoard/second.svg" : "/Images/LeaderBoard/third.svg"} alt={`#${place}`} className="w-20 h-20 -mt-6" />
-        <img src="/Images/LeaderBoard/PodiumPintoo.svg" alt="podium" className="w-32 h-32" />
+        <img src={place === 1 ? "/images/LeaderBoard/first.svg" : place === 2 ? "/images/LeaderBoard/second.svg" : "/images/LeaderBoard/third.svg"} alt={`#${place}`} className="w-20 h-20 -mt-6" />
+        <img src="/images/LeaderBoard/PodiumPintoo.svg" alt="podium" className="w-32 h-32" />
       </div>
       <p className="font-area ch-text text-center mt-2" style={{ fontSize: 18, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180 }}>{item.team_name}</p>
       <p className="font-area" style={{ color: '#F5753B', fontSize: 16 }}>{item.points} pts</p>

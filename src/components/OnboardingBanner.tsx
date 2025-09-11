@@ -22,9 +22,9 @@ export default function OnboardingBanner() {
 
   return (
     <div className="relative overflow-hidden rounded-2xl mb-6 ch-card">
-      <div className="absolute inset-0 opacity-25" style={{ backgroundImage: "url('/Images/onboarding1worldmapbg.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+      <div className="absolute inset-0 opacity-25" style={{ backgroundImage: "url('/images/onboarding1worldmapbg.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'center' }} />
       <div className="relative flex flex-col sm:flex-row items-center gap-4 p-5">
-        <img src="/Images/onboardingowl.svg" alt="owl" className="w-20 h-20 sm:w-24 sm:h-24" />
+        <img src="/images/onboardingowl.svg" alt="owl" className="w-20 h-20 sm:w-24 sm:h-24" />
         <div className="flex-1 text-center sm:text-left">
           <p className="font-qurova ch-text text-2xl">Hi{user?.name ? `, ${user.name}` : ''}!</p>
           <p className="font-area ch-subtext text-sm">Welcome to Cryptic Hunt RSVP. Jump into your team, check the leaderboard, or start solving questions.</p>

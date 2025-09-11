@@ -39,8 +39,8 @@ export default function Home() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <img src="/Images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
+      <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <img src="/images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
 
       <div className="relative ch-container py-12 pb-28 safe-bottom">
         <header className="flex items-center justify-between">
@@ -86,7 +86,7 @@ export default function Home() {
           
           {/* Banner row (boarding banner thingy) */}
           <div className="rounded-2xl p-6 flex items-center gap-4 ch-card">
-            <img src="/Images/onboardingowl.svg" alt="owl" className="w-20 h-20" />
+            <img src="/images/onboardingowl.svg" alt="owl" className="w-20 h-20" />
             <div className="flex-1">
               <p className="font-qurova ch-text text-lg">Boarding soon</p>
               <p className="font-area ch-subtext text-sm">Keep your squad ready — hunt launches with phases. Follow the announcements.</p>

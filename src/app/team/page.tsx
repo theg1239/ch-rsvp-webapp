@@ -65,8 +65,8 @@ export default function TeamPage() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <img src="/Images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <img src="/images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
       <div className="relative ch-container ch-container-narrow py-10 safe-bottom">
         <header className="text-center mb-6">
           <h1 className="font-qurova ch-gradient-text ch-h1">Create your Squad</h1>
@@ -145,7 +145,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
         </div>
         <div className="w-full flex items-center justify-center">
           <button className="rounded-full px-8 py-3 bg-white flex items-center gap-3" type="button" onClick={()=>setScanOpen(true)}>
-            <img src="/Images/JoinPage/scanning.svg" alt="scan" className="w-5 h-5" />
+            <img src="/images/JoinPage/scanning.svg" alt="scan" className="w-5 h-5" />
             <span className="font-area" style={{ color: '#2C2824' }}>Join using QR</span>
           </button>
         </div>

@@ -4,11 +4,11 @@ import { usePathname } from "next/navigation";
 
 type NavItem = { href: string; label: string; icon: string; external?: boolean };
 const items: NavItem[] = [
-  { href: "/", label: "Home", icon: "/Images/NavBar/home.svg" },
-  { href: "/profile", label: "Profile", icon: "/Images/NavBar/profilenew.svg" },
-  { href: "/leaderboard", label: "Leaderboard", icon: "/Images/NavBar/cup.svg" },
-  { href: "/questions", label: "Questions", icon: "/Images/NavBar/note.svg" },
-  { href: "https://gravitas.vit.ac.in", label: "Register", icon: "/Images/NavBar/calendar-2.svg", external: true },
+  { href: "/", label: "Home", icon: "/images/NavBar/home.svg" },
+  { href: "/profile", label: "Profile", icon: "/images/NavBar/profilenew.svg" },
+  { href: "/leaderboard", label: "Leaderboard", icon: "/images/NavBar/cup.svg" },
+  { href: "/questions", label: "Questions", icon: "/images/NavBar/note.svg" },
+  { href: "https://gravitas.vit.ac.in", label: "Register", icon: "/images/NavBar/calendar-2.svg", external: true },
 ];
 
 import { useAuth } from "../context/AuthContext";

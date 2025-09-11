@@ -59,11 +59,11 @@ export default function QuestionDetail() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
       <div className="relative ch-container ch-container-narrow py-6 pb-28 safe-bottom">
         <div className="flex items-center gap-3 mb-4">
           <button onClick={() => router.back()} aria-label="Back" className="rounded-full p-2 hover:opacity-90">
-            <img src="/Images/QuestionsPage/left-arrow.svg" alt="Back" className="w-5 h-5" />
+            <img src="/images/QuestionsPage/left-arrow.svg" alt="Back" className="w-5 h-5" />
           </button>
           <h1 className="font-qurova ch-gradient-text ch-h3">{data?.question_name || "Question"}</h1>
         </div>

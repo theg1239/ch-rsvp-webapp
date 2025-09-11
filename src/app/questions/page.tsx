@@ -40,10 +40,10 @@ export default function QuestionsIndex() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
       <div className="relative ch-container ch-container-narrow py-10 pb-28 safe-bottom">
         <div className="flex items-center gap-3 mb-6">
-          <Image src="/Images/QuestionsPage/refresh.svg" alt="refresh" width={20} height={20} className="w-5 h-5 opacity-80" onClick={() => location.reload()} />
+          <Image src="/images/QuestionsPage/refresh.svg" alt="refresh" width={20} height={20} className="w-5 h-5 opacity-80" onClick={() => location.reload()} />
           <h1 className="font-qurova ch-gradient-text ch-h2">Questions</h1>
         </div>
         {loading && <p className="font-area ch-subtext">Loading…</p>}
