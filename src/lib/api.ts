@@ -1,6 +1,6 @@
 import { getIdToken } from "../lib/firebase";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3005";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ch.acm.today";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
