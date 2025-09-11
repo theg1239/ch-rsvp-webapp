@@ -33,9 +33,9 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-dvh ch-bg relative">
       <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <div className="relative max-w-4xl mx-auto px-6 py-10 pb-28">
+      <div className="relative ch-container py-10 pb-28 safe-bottom">
         <header className="text-center mb-8">
-          <h1 className="font-qurova ch-gradient-text" style={{ fontSize: 42 }}>cryptic hunt</h1>
+          <h1 className="font-qurova ch-gradient-text ch-h1">cryptic hunt</h1>
           <p className="font-area ch-text" style={{ fontSize: 18 }}>Leaderboard</p>
         </header>
 
@@ -44,11 +44,11 @@ export default function LeaderboardPage() {
 
         {!loading && !err && (
           <>
-            {/* Podium */}
-            <div className="flex items-end justify-center gap-6 mb-10">
-              {top3[1] ? <Podium place={2} item={top3[1]} /> : <div className="w-40" />}
-              {top3[0] ? <Podium place={1} item={top3[0]} /> : <div className="w-40" />}
-              {top3[2] ? <Podium place={3} item={top3[2]} /> : <div className="w-40" />}
+            {/* Podium: scrollable on small screens, centered on md+ */}
+            <div className="flex items-end justify-center gap-6 mb-10 scroll-x snap-x md:snap-none">
+              {top3[1] ? <Podium place={2} item={top3[1]} /> : <div className="w-40 shrink-0" />}
+              {top3[0] ? <Podium place={1} item={top3[0]} /> : <div className="w-40 shrink-0" />}
+              {top3[2] ? <Podium place={3} item={top3[2]} /> : <div className="w-40 shrink-0" />}
             </div>
 
             {/* List 4..10 */}
@@ -77,7 +77,7 @@ function Podium({ place, item }: { place: 1 | 2 | 3; item: LBItem }) {
   };
   const height = place === 1 ? 260 : 220;
   return (
-    <div className="flex flex-col items-center" style={{ width: 180 }}>
+    <div className="flex flex-col items-center snap-center shrink-0" style={{ width: 'clamp(140px, 45vw, 180px)' }}>
       <div className="w-full rounded-2xl flex flex-col items-center justify-end" style={{ height, background: gradients[place] }}>
         <img src={place === 1 ? "/Images/LeaderBoard/first.svg" : place === 2 ? "/Images/LeaderBoard/second.svg" : "/Images/LeaderBoard/third.svg"} alt={`#${place}`} className="w-20 h-20 -mt-6" />
         <img src="/Images/LeaderBoard/PodiumPintoo.svg" alt="podium" className="w-32 h-32" />

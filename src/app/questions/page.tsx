@@ -41,10 +41,10 @@ export default function QuestionsIndex() {
   return (
     <div className="min-h-dvh ch-bg relative">
       <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <div className="relative max-w-3xl mx-auto px-6 py-10">
+      <div className="relative ch-container ch-container-narrow py-10 pb-28 safe-bottom">
         <div className="flex items-center gap-3 mb-6">
           <Image src="/Images/QuestionsPage/refresh.svg" alt="refresh" width={20} height={20} className="w-5 h-5 opacity-80" onClick={() => location.reload()} />
-          <h1 className="font-qurova ch-gradient-text" style={{ fontSize: 28 }}>Questions</h1>
+          <h1 className="font-qurova ch-gradient-text ch-h2">Questions</h1>
         </div>
         {loading && <p className="font-area ch-subtext">Loading…</p>}
         {err && <p className="text-red-400 font-area">{err}</p>}
@@ -60,7 +60,7 @@ export default function QuestionsIndex() {
         {questions.length > 0 && (
           <ul className="grid gap-3">
             {questions.map((q) => (
-              <li key={q.id} className="rounded-xl p-4 flex items-center justify-between" style={{ background: 'rgba(0,0,0,0.25)' }}>
+              <li key={q.id} className="rounded-xl p-4 flex items-center justify-between ch-card">
                 <div>
                   <p className="ch-text font-qurova text-lg">{q.name}</p>
                   <p className="font-area ch-subtext text-sm">{q.difficulty?.level || ''}</p>
@@ -86,7 +86,7 @@ export default function QuestionsIndex() {
             </ul>
           </div>
         )}
-        
+
       </div>
     </div>
   );

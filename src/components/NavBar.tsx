@@ -21,9 +21,8 @@ export default function NavBar() {
   if (path.startsWith("/signin") || path.startsWith("/signup")) return null;
   if (!initialized || !user) return null;
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4">
-      <div className="rounded-2xl px-4 py-2 flex items-center justify-between gap-2"
-           style={{ background: "rgba(0,0,0,0.35)", backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)' }}>
+    <nav className="fixed nav-safe-offset left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4" aria-label="Primary">
+      <div className="rounded-2xl px-4 py-2 flex items-center justify-between gap-2 ch-card ch-glass">
         {items.map((it) => {
           // Highlight only real route matches
           const active = (!it.external && pathname === it.href);

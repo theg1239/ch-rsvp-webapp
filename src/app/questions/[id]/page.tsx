@@ -60,19 +60,19 @@ export default function QuestionDetail() {
   return (
     <div className="min-h-dvh ch-bg relative">
       <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <div className="relative max-w-3xl mx-auto px-6 py-6 pb-28">
+      <div className="relative ch-container ch-container-narrow py-6 pb-28 safe-bottom">
         <div className="flex items-center gap-3 mb-4">
           <button onClick={() => router.back()} aria-label="Back" className="rounded-full p-2 hover:opacity-90">
             <img src="/Images/QuestionsPage/left-arrow.svg" alt="Back" className="w-5 h-5" />
           </button>
-          <h1 className="font-qurova ch-gradient-text" style={{ fontSize: 24 }}>{data?.question_name || "Question"}</h1>
+          <h1 className="font-qurova ch-gradient-text ch-h3">{data?.question_name || "Question"}</h1>
         </div>
         {loading && <p className="font-area ch-subtext">Loading…</p>}
         {err && <p className="text-red-400 font-area">{err}</p>}
 
         {currentPart && (
           <div className="grid gap-4">
-            <div className="rounded-2xl p-4" style={{ background: 'rgba(0,0,0,0.25)' }}>
+            <div className="rounded-2xl p-4 ch-card">
               <PartContent part={currentPart} />
             </div>
             <div className="grid gap-2">
@@ -83,7 +83,7 @@ export default function QuestionDetail() {
             {submitMsg && <p className="font-area" style={{ color: points ? '#22c55e' : '#fca5a5' }}>{submitMsg}{points ? ` (+${points})` : ''}</p>}
           </div>
         )}
-        
+
       </div>
       <LoadingOverlay show={busy} label="Submitting..." />
       <Modal open={showSuccess} onClose={()=>setShowSuccess(false)} title="Correct ✅" success>
@@ -101,7 +101,7 @@ function PartContent({ part }: { part: { id: string; content: Array<string | { t
   const normType = (t: unknown) => (typeof t === 'string' ? t.toLowerCase() : '');
 
   return (
-    <div className="rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.25)' }}>
+    <div className="rounded-xl p-4 ch-card">
       <div className="grid gap-3">
         {Array.isArray(part.content) && part.content.map((c, idx) => {
           // Handle both object and string content
@@ -112,7 +112,7 @@ function PartContent({ part }: { part: { id: string; content: Array<string | { t
           const data: string | undefined = (c as { data?: string; text?: string; url?: string }).data ?? (c as { text?: string }).text ?? (c as { url?: string }).url;
           // Image
           if (data && (t.includes('image') || isImageUrl(data))) {
-            return <img key={idx} src={data} alt="content" className="rounded max-w-full" />;
+            return <img key={idx} src={data} alt="content" className="ch-img" />;
           }
           // Link
           if (data && (t.includes('link') || t.includes('url'))) {

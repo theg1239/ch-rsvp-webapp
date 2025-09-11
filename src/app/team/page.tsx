@@ -67,9 +67,9 @@ export default function TeamPage() {
     <div className="min-h-dvh ch-bg relative">
       <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
       <img src="/Images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
-      <div className="relative max-w-3xl mx-auto px-6 py-10">
+      <div className="relative ch-container ch-container-narrow py-10 safe-bottom">
         <header className="text-center mb-6">
-          <h1 className="font-qurova ch-gradient-text" style={{ fontSize: "36px" }}>Create your Squad</h1>
+          <h1 className="font-qurova ch-gradient-text ch-h1">Create your Squad</h1>
         </header>
         {content}
       </div>
@@ -115,7 +115,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
   return (
     <div className="grid gap-8">
       <section className="grid gap-3">
-        <h2 className="font-qurova ch-gradient-text">Create a team</h2>
+        <h2 className="font-qurova ch-gradient-text ch-h2">Create a team</h2>
         <input
           className="w-full h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area"
           placeholder="Team name"
@@ -128,7 +128,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
       </section>
 
       <section className="grid gap-3">
-        <h2 className="font-qurova ch-gradient-text">Join with code</h2>
+        <h2 className="font-qurova ch-gradient-text ch-h2">Join with code</h2>
         <CodeInputs value={code} onChange={setCode} length={6} />
         <button onClick={joinTeam} className="h-11 rounded-xl font-qurova ch-btn">Join team</button>
 
@@ -209,7 +209,7 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
 function CodeInputs({ value, onChange, length }: { value: string; onChange: (v: string) => void; length: number }) {
   const chars = Array.from({ length }, (_, i) => value[i] || "");
   return (
-    <div className="flex items-center justify-center gap-3">
+    <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
       {chars.map((ch, i) => (
         <input
           key={i}
@@ -224,8 +224,8 @@ function CodeInputs({ value, onChange, length }: { value: string; onChange: (v: 
           }}
           className="text-center font-qurova"
           style={{
-            height: 56,
-            width: 56,
+            height: 'clamp(44px, 9vw, 56px)',
+            width: 'clamp(44px, 9vw, 56px)',
             borderWidth: 2,
             borderColor: MainColors.orange,
             borderRadius: 18,
