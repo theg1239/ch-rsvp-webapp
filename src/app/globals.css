@@ -87,6 +87,31 @@ body {
 .font-area { font-family: 'AreaVariable-Thin', 'AreaVariable', var(--font-geist-sans), ui-sans-serif, system-ui; font-weight: 300; }
 .font-geist { font-family: var(--font-geist-sans), ui-sans-serif, system-ui; }
 
+.nav-icon { 
+  filter: grayscale(1) brightness(1.1) opacity(0.95);
+  transition: filter 120ms ease, opacity 120ms ease;
+}
+.nav-icon.active {
+  filter: invert(57%) sepia(65%) saturate(1038%) hue-rotate(341deg) brightness(101%) contrast(96%);
+  opacity: 1;
+}
+
 /* Utility tweaks to mimic RN spacing/feel */
 .ch-title { letter-spacing: 0.5px; }
 .ch-tagline { letter-spacing: -0.2px; }
+
+/* Motion + polish */
+.fade-in { animation: fadein .35s ease-out both; }
+@keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.elevate { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.elevate:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,.25); border-color: rgba(255,255,255,.08); }
+
+.btn-ripple { position: relative; overflow: hidden; }
+.btn-ripple:after { content: ""; position:absolute; inset:auto auto 50% 50%; width:0; height:0; background: rgba(255,255,255,.25); border-radius:50%; transform: translate(-50%,-50%); opacity:0; transition: width .35s ease, height .35s ease, opacity .35s ease; }
+.btn-ripple:active:after { width:220px; height:220px; opacity:1; inset:auto auto 50% 50%; }
+
+/* Skeletons */
+.skeleton { position:relative; overflow:hidden; background: rgba(255,255,255,.06); border-radius: 10px; }
+.skeleton:after { content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent); transform: translateX(-100%); animation: shimmer 1.2s infinite; }
+@keyframes shimmer { to { transform: translateX(100%); } }

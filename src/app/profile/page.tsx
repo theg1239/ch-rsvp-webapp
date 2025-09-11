@@ -39,8 +39,9 @@ export default function ProfilePage() {
   }, [initialized, user, router]);
 
   return (
-    <div className="min-h-dvh ch-bg">
-      <div className="max-w-3xl mx-auto px-6 py-10">
+    <div className="min-h-dvh ch-bg relative">
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <div className="relative max-w-3xl mx-auto px-6 py-10">
         <header className="text-center mb-6">
           <h1 className="font-qurova ch-orange" style={{ fontSize: "36px" }}>Profile</h1>
         </header>

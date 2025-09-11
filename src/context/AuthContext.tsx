@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signInWithGooglePopup();
       const token = await getIdToken(true);
       setIdToken(token);
+      try { window.localStorage.setItem('show_welcome', '1'); } catch {}
       // Auto-complete onboarding with placeholder data
       try { await api.post("/app/onboarding", { phone: "9999999999", gender: "OTHER" }); } catch {}
     },

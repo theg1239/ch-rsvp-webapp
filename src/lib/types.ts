@@ -9,3 +9,23 @@ export type ProfileData = {
   points: number;
 };
 
+export type MainPhaseActive = {
+  status: "success";
+  message: "PHASE_ACTIVE";
+  data: {
+    active_phase: number;
+    questions: Array<{ id: string; name: string; difficulty?: { level?: string } }>;
+    solved_questions?: Array<{ id: string; name: string; difficulty?: { level?: string } }>;
+  };
+};
+
+export type MainGeneric = { status: string; message: string; data?: any };
+
+export type GetQuestionRes = ApiOk<{
+  question_name: string;
+  question_parts: Array<{ id: string; content: any[] }>;
+  question_parts_count: number;
+  difficulty: string;
+}>;
+
+export type SubmitResponseRes = ApiOk<{ response: any; points: number }>;

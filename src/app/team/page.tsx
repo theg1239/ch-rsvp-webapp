@@ -90,7 +90,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
     setBusy("Creating team…");
     try {
       await api.post<ApiOk<string>>("/api/user/team/create", { name });
-      router.push("/team/created");
+      router.push("/questions");
     } catch (e: any) {
       setErr(e?.message || "Failed to create team");
     } finally {
@@ -104,7 +104,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
     setBusy("Joining team…");
     try {
       await api.post<ApiOk<unknown>>("/api/user/team/join", { code });
-      router.push("/team/created");
+      router.push("/questions");
     } catch (e: any) {
       setErr(e?.message || "Failed to join team");
     } finally {

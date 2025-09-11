@@ -4,7 +4,7 @@ Auth integration with Firebase Web SDK has been added to support Cryptic Hunt 20
 
 ## Configure
 
-1. Copy `.env.example` to `.env.local` and fill the Firebase config (from your Firebase console) and backend base URL.
+1. Copy `.env.example` to `.env.local` and fill the Firebase config (from your Firebase console) and backend base URL. In the backend `.env`, set `RSVP_MODE=true` to enable RSVP behavior (auto check-in on creation, list questions without phase gating).
 
 ```
 cp .env.example .env.local

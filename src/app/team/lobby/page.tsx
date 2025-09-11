@@ -57,16 +57,16 @@ export default function SquadLobbyPage() {
             To start hunting you need at least 2 members in the squad. You can have up to 6 members in a squad.
           </p>
 
-          <div className="mt-6 flex items-center justify-center gap-4">
+          {/* <div className="mt-6 flex items-center justify-center gap-4">
             <a href="/team" className="px-6 py-3 rounded-xl font-qurova ch-btn">Leave Team</a>
-          </div>
+          </div> */}
         </main>
 
         <footer className="mt-10">
           <div className="flex items-center justify-center">
-            <button className="border-2 rounded-2xl px-8 py-3 font-qurova ch-text" style={{ borderColor: canProceed ? MainColors.orange : '#888' }} disabled={!canProceed}>
+            {/* <button className="border-2 rounded-2xl px-8 py-3 font-qurova ch-text" style={{ borderColor: canProceed ? MainColors.orange : '#888' }} disabled={!canProceed}>
               Proceed
-            </button>
+            </button> */}
           </div>
         </footer>
       </div>
