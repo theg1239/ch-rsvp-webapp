@@ -98,8 +98,33 @@ export default function QuestionDetail() {
 }
 
 function PartContent({ part }: { part: { id: string; content: Array<string | { type?: string; data?: string; text?: string; url?: string }> } }) {
-  const isImageUrl = (s: string) => /\.(png|jpe?g|gif|svg|webp)(\?.*)?$/i.test(s) || s.startsWith('data:image') || s.startsWith('http') && /(\/(png|jpe?g|gif|svg|webp))/.test(s);
+  const isImageUrl = (s: string) => {
+    if (!s) return false;
+    const url = s.trim();
+    // common cases: file extensions, data URLs
+    if (/\.(png|jpe?g|gif|svg|webp)(\?.*)?$/i.test(url)) return true;
+    if (url.startsWith('data:image')) return true;
+    // heuristic: if path segment ends with image-like extension even with query/cdn rules
+    try {
+      const u = new URL(url);
+      const pathname = u.pathname || '';
+      if (/\.(png|jpe?g|gif|svg|webp)$/i.test(pathname)) return true;
+    } catch {}
+    return false;
+  };
   const normType = (t: unknown) => (typeof t === 'string' ? t.toLowerCase() : '');
+
+  const LinkOrImage = ({ url }: { url: string }) => {
+    const [broken, setBroken] = useState(false);
+    if (!broken) {
+      return <img src={url} alt="content" className="ch-img" onError={() => setBroken(true)} />;
+    }
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" className="font-area underline ch-text">
+        Open link
+      </a>
+    );
+  };
 
   return (
     <div className="rounded-xl p-4 ch-card">
@@ -111,13 +136,13 @@ function PartContent({ part }: { part: { id: string; content: Array<string | { t
           }
           const t = normType((c as { type?: string }).type);
           const data: string | undefined = (c as { data?: string; text?: string; url?: string }).data ?? (c as { text?: string }).text ?? (c as { url?: string }).url;
-          // Image
+          // Image (including LINK that points to an image)
           if (data && (t.includes('image') || isImageUrl(data))) {
             return <img key={idx} src={data} alt="content" className="ch-img" />;
           }
-          // Link
+          // Link: try to render as image first with safe fallback to anchor
           if (data && (t.includes('link') || t.includes('url'))) {
-            return <a key={idx} href={data} target="_blank" rel="noopener noreferrer" className="font-area underline ch-text">Open link</a>;
+            return <LinkOrImage key={idx} url={data} />;
           }
           // Text (including TEXT)
           if (data && (t === '' || t.includes('text') || t === 'string')) {
