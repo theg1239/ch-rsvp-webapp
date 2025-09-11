@@ -8,6 +8,8 @@ import Modal from "../../../components/Modal";
 import { useAuth } from "../../../context/AuthContext";
 
 const MainColors = { orange: "#F5753B", text: "#ffffff", subText: "#cccccc" } as const;
+// Global switch to close submissions immediately
+const SUBMISSIONS_CLOSED = true;
 
 export default function QuestionDetail() {
   const params = useParams<{ id: string }>();
@@ -45,6 +47,11 @@ export default function QuestionDetail() {
 
   const submit = async () => {
     if (!currentPart) return;
+    if (SUBMISSIONS_CLOSED) {
+      setSubmitMsg("Submissions are closed at the moment.");
+      setShowIncorrect(true);
+      return;
+    }
     setSubmitMsg(null); setPoints(null); setBusy(true);
     try {
       // Normalize answer: remove ALL whitespace and uppercase
@@ -96,8 +103,11 @@ export default function QuestionDetail() {
             </div>
             <div className="grid gap-2">
               <label className="font-area ch-subtext text-sm">Your Answer</label>
-              <input value={answer} onChange={(e) => setAnswer(e.target.value)} className="h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area" placeholder="Type answer" />
-              <button onClick={submit} className="h-11 rounded-xl font-qurova ch-btn">Submit</button>
+              {SUBMISSIONS_CLOSED && (
+                <p className="font-area text-amber-300 text-sm">Submissions are currently closed.</p>
+              )}
+              <input disabled={SUBMISSIONS_CLOSED} value={answer} onChange={(e) => setAnswer(e.target.value)} className="h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area disabled:opacity-60" placeholder="Type answer" />
+              <button disabled={SUBMISSIONS_CLOSED} onClick={submit} className="h-11 rounded-xl font-qurova ch-btn">Submit</button>
             </div>
             {submitMsg && <p className="font-area" style={{ color: points && points > 0 ? '#22c55e' : '#fca5a5' }}>{submitMsg}{points != null ? ` (+${points})` : ''}</p>}
           </div>
