@@ -57,35 +57,39 @@ export default function QuestionsIndex() {
             </div>
           </div>
         )}
-        {questions.length > 0 && (
-          <ul className="grid gap-3">
-            {questions.map((q) => (
-              <li key={q.id} className="rounded-xl p-4 flex items-center justify-between ch-card">
-                <div>
-                  <p className="ch-text font-qurova text-lg">{q.name}</p>
-                  <p className="font-area ch-subtext text-sm">{q.difficulty?.level || ''}</p>
-                </div>
-                <Link href={`/questions/${q.id}`} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</Link>
-              </li>
-            ))}
-          </ul>
-        )}
-        {solved.length > 0 && (
-          <div className="mt-8">
-            <h3 className="font-qurova ch-text mb-2">Solved</h3>
+
+        {/* Scroll area for lists so only this section scrolls */}
+        <div className="scroll-area-y mt-4">
+          {questions.length > 0 && (
             <ul className="grid gap-3">
-              {solved.map((q) => (
-                <li key={q.id} className="rounded-xl p-4 flex items-center justify-between" style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid #2e7d32' }}>
+              {questions.map((q) => (
+                <li key={q.id} className="rounded-xl p-4 flex items-center justify-between ch-card">
                   <div>
                     <p className="ch-text font-qurova text-lg">{q.name}</p>
                     <p className="font-area ch-subtext text-sm">{q.difficulty?.level || ''}</p>
                   </div>
-                  <span className="font-qurova" style={{ color: '#22c55e' }}>Completed</span>
+                  <Link href={`/questions/${q.id}`} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</Link>
                 </li>
               ))}
             </ul>
-          </div>
-        )}
+          )}
+          {solved.length > 0 && (
+            <div className="mt-8">
+              <h3 className="font-qurova ch-text mb-2">Solved</h3>
+              <ul className="grid gap-3">
+                {solved.map((q) => (
+                  <li key={q.id} className="rounded-xl p-4 flex items-center justify-between" style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid #2e7d32' }}>
+                    <div>
+                      <p className="ch-text font-qurova text-lg">{q.name}</p>
+                      <p className="font-area ch-subtext text-sm">{q.difficulty?.level || ''}</p>
+                    </div>
+                    <span className="font-qurova" style={{ color: '#22c55e' }}>Completed</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
 
       </div>
     </div>
