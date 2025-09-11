@@ -225,16 +225,17 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
 }
 
 function QRScanModal({ onClose, onResult }: { onClose: () => void; onResult: (text: string) => void }) {
-  const videoRef = useState<HTMLVideoElement | null>(null)[0] as HTMLVideoElement | null;
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
+    let currentStream: MediaStream | null = null;
     const start = async () => {
       try {
         const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
         if (!active) return;
         setStream(s);
+        currentStream = s;
         const v = (document.getElementById('qr-video') as HTMLVideoElement);
         if (v) {
           v.srcObject = s;
@@ -266,9 +267,9 @@ function QRScanModal({ onClose, onResult }: { onClose: () => void; onResult: (te
     void start();
     return () => {
       active = false;
-      if (stream) stream.getTracks().forEach(t => t.stop());
+      if (currentStream) currentStream.getTracks().forEach(t => t.stop());
     };
-  }, []);
+  }, [onResult]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter:'blur(2px)' }}>
