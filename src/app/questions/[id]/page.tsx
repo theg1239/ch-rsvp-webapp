@@ -49,9 +49,10 @@ export default function QuestionDetail() {
       const normalized = answer.replace(/\s+/g, "").toUpperCase();
       const payload: { type: string; data: string; question_part_id: string } = { type: "STRING", data: normalized, question_part_id: currentPart.id };
       const res = await api.post<SubmitResponseRes>("/api/response/", payload);
-      const pts = (res as unknown as { data?: { points?: number } }).data?.points;
-      setPoints(typeof pts === 'number' ? pts : null);
-      setSubmitMsg(typeof pts === 'number' ? "Correct! Points awarded." : "Submitted.");
+      const ptsRaw = (res as unknown as { data?: { points?: number | string } }).data?.points;
+      const ptsNum = typeof ptsRaw === 'number' ? ptsRaw : (typeof ptsRaw === 'string' ? Number.parseInt(ptsRaw, 10) : null);
+      setPoints(Number.isFinite(ptsNum as number) ? (ptsNum as number) : null);
+      setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Submitted.");
       setAnswer("");
       await refresh();
       setShowSuccess(true);
@@ -84,14 +85,14 @@ export default function QuestionDetail() {
               <input value={answer} onChange={(e) => setAnswer(e.target.value)} className="h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area" placeholder="Type answer" />
               <button onClick={submit} className="h-11 rounded-xl font-qurova ch-btn">Submit</button>
             </div>
-            {submitMsg && <p className="font-area" style={{ color: points ? '#22c55e' : '#fca5a5' }}>{submitMsg}{points ? ` (+${points})` : ''}</p>}
+            {submitMsg && <p className="font-area" style={{ color: points && points > 0 ? '#22c55e' : '#fca5a5' }}>{submitMsg}{points != null ? ` (+${points})` : ''}</p>}
           </div>
         )}
 
       </div>
       <LoadingOverlay show={busy} label="Submitting..." />
       <Modal open={showSuccess} onClose={()=>setShowSuccess(false)} title="Correct ✅" success>
-        <p className="font-area ch-text">You earned <span className="font-qurova" style={{ color:'#22c55e' }}>+{points ?? 0}</span> points.</p>
+        <p className="font-area ch-text">{points != null ? (<span>You earned <span className="font-qurova" style={{ color:'#22c55e' }}>+{points}</span> points.</span>) : 'Submitted successfully.'}</p>
       </Modal>
       <Modal open={showIncorrect} onClose={()=>setShowIncorrect(false)} title="Try again">
         <p className="font-area ch-text">That doesn&apos;t match. Check the question again! Ensure no spaces in the answer.</p>
