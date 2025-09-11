@@ -220,7 +220,7 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
 }
 
 function QRScanModal({ onClose, onResult }: { onClose: () => void; onResult: (text: string) => void }) {
-  const videoRef = useState<HTMLVideoElement | null>(null)[0] as any;
+  const videoRef = useState<HTMLVideoElement | null>(null)[0] as HTMLVideoElement | null;
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -236,7 +236,7 @@ function QRScanModal({ onClose, onResult }: { onClose: () => void; onResult: (te
           await v.play();
         }
         // Try BarcodeDetector
-        const AnyBD = (window as any).BarcodeDetector;
+      const AnyBD = (window as typeof window & { BarcodeDetector?: typeof BarcodeDetector }).BarcodeDetector;
         if (AnyBD) {
           const detector = new AnyBD({ formats: ['qr_code'] });
           const scan = async () => {
