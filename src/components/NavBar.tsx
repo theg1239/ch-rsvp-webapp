@@ -10,7 +10,7 @@ const items: NavItem[] = [
   { href: "/profile", label: "Profile", icon: "/images/NavBar/profilenew.svg" },
   { href: "/leaderboard", label: "Leaderboard", icon: "/images/NavBar/cup.svg" },
   { href: "/questions", label: "Questions", icon: "/images/NavBar/note.svg" },
-  { href: "https://gravitas.vit.ac.in", label: "Register", icon: "/images/NavBar/calendar-2.svg", external: true },
+  { href: "https://gravitas.vit.ac.in/events/3df08aa2-22c9-42ff-8640-de501218780f", label: "Register", icon: "/images/NavBar/calendar-2.svg", external: true },
 ];
 
 import { useAuth } from "../context/AuthContext";
@@ -49,21 +49,26 @@ export default function NavBar() {
           {items.map((it) => {
             // Highlight only real route matches
             const active = (!it.external && pathname === it.href);
+            const isRegister = it.label.toLowerCase() === 'register' || (it.external && it.href.includes('gravitas'));
+            const showActiveStyle = active || isRegister;
             const content = (
               <>
-                <img src={it.icon} alt={it.label} className={`w-[22px] h-[22px] nav-icon ${active ? 'active' : ''}`} />
-                <span className="text-[11px] mt-0.5" style={{ color: active ? '#F5753B' : '#ccc' }}>{it.label}</span>
+                <Image src={it.icon} alt={it.label} width={22} height={22} className={`w-[22px] h-[22px] nav-icon ${showActiveStyle ? 'active' : ''}`} />
+                <span className={`text-[11px] mt-0.5 ${isRegister ? 'px-2 py-[2px] rounded-md' : ''}`}
+                      style={{ color: showActiveStyle ? '#F5753B' : '#ccc', background: isRegister ? 'rgba(245,117,59,0.12)' : 'transparent' }}>
+                  {it.label}
+                </span>
                 {active && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 ch-gradient" />}
-            </>
-          );
+              </>
+            );
 
             return it.external ? (
               <a key={it.href} href={it.href} target="_blank" rel="noopener noreferrer"
-                 className="relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1 hover:opacity-90">
+                 className={`relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1 hover:opacity-90 ${isRegister ? 'rounded-xl ring-1 ring-[rgba(245,117,59,0.35)]' : ''}`}>
                 {content}
               </a>
             ) : (
-              <Link key={it.href} href={it.href} className="relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1">
+              <Link key={it.href} href={it.href} className={`relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1 ${isRegister ? 'rounded-xl ring-1 ring-[rgba(245,117,59,0.35)]' : ''}`}>
                 {content}
               </Link>
             );
