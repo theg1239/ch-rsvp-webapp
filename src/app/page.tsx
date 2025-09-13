@@ -6,19 +6,31 @@ import { useEffect, useMemo, useState } from "react";
 import MainStatus from "../components/MainStatus";
 import OnboardingBanner from "../components/OnboardingBanner";
 import api from "../lib/api";
-import type { ApiOk, ProfileData } from "../lib/types";
+import type { ApiOk, ProfileData, MainGeneric } from "../lib/types";
+import { useAppStore } from "../store/appStore";
 
 export default function Home() {
   const { user, initialized, signOut } = useAuth();
   const router = useRouter();
   const [teamName, setTeamName] = useState<string | null>(null);
   const [teamCode, setTeamCode] = useState<string | null>(null);
+  const { setView } = useAppStore();
+  const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
 
-  useEffect(() => { if (initialized && !user) router.replace("/signin"); }, [initialized, user, router]);
+  useEffect(() => { if (initialized && !user) { if (SPA) setView('signin'); else router.replace("/signin"); } }, [initialized, user, router, SPA, setView]);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
+      try {
+        // Let backend drive the flow like the app
+        const main = await api.get<MainGeneric>("/api/main");
+        if (!mounted) return;
+        const msg = (main.message || '').toUpperCase();
+        if (msg === 'ONBOARDING_INCOMPLETE') { router.replace('/onboarding'); return; }
+        if (msg === 'NO_TEAM') { router.replace('/team'); return; }
+        if (msg === 'TEAM_NOT_CHECKED_IN') { router.replace('/checkin'); return; }
+      } catch {}
       try {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;
@@ -26,7 +38,6 @@ export default function Home() {
         if (t) { setTeamName(t.name); setTeamCode(t.code); }
         else { router.replace("/team"); }
       } catch (e) {
-        // Backend sends 400 when not in any team
         const msg = e instanceof Error ? e.message : "";
         if (msg.includes("User is not part of any team") || msg.includes("400")) router.replace("/team");
       }
@@ -50,7 +61,7 @@ export default function Home() {
           </div>
           <div className="absolute right-6 top-12 sm:static sm:right-0 sm:top-0">
             <button
-              onClick={async ()=>{ try { await signOut(); } finally { router.replace('/signin'); } }}
+              onClick={async ()=>{ try { await signOut(); } finally { if (SPA) setView('signin'); else router.replace('/signin'); } }}
               className="px-4 py-2 rounded-xl font-qurova"
               style={{ border: '2px solid var(--ch-orange)' }}
             >

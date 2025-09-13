@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../lib/api";
-import type { ApiOk, ProfileData } from "../../lib/types";
+import type { ApiOk, ProfileData, MainGeneric } from "../../lib/types";
+import { useAppStore } from "../../store/appStore";
 
 declare class BarcodeDetector {
   constructor(options?: { formats?: string[] });
@@ -22,16 +23,26 @@ type ProfileState = { loading: boolean; data: ProfileData | null; notInTeam: boo
 export default function TeamPage() {
   const router = useRouter();
   const { user, initialized } = useAuth();
+  const { setView, setHideNav } = useAppStore();
+  const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
   const [state, setState] = useState<ProfileState>({ loading: true, data: null, notInTeam: false, error: null });
   const [qrB64, setQrB64] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialized && !user) {
-      router.replace("/signin");
-      return;
-    }
+    // Hide NavBar on team onboarding/management page
+    setHideNav(true);
+    return () => { setHideNav(false); };
+  }, [setHideNav]);
+
+  useEffect(() => {
+    if (initialized && !user) { if (SPA) setView('signin'); else router.replace("/signin"); return; }
     let mounted = true;
     (async () => {
+      try {
+        const main = await api.get<MainGeneric>("/api/main");
+        const msg = (main.message || '').toUpperCase();
+        if (msg === 'ONBOARDING_INCOMPLETE') { if (SPA) setView('onboarding'); else router.replace('/onboarding'); return; }
+      } catch {}
       try {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;
@@ -84,6 +95,8 @@ export default function TeamPage() {
 
 function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
   const router = useRouter();
+  const { setView } = useAppStore();
+  const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -96,7 +109,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
     setBusy("Creating team…");
     try {
       await api.post<ApiOk<string>>("/api/user/team/create", { name });
-      router.push("/questions");
+      if (SPA) setView('questions'); else router.push("/questions");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Failed to create team");
     } finally {
@@ -115,7 +128,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
     setErr(null);
     try {
       await api.post<ApiOk<unknown>>("/api/user/team/join", { code: c });
-      router.push("/questions");
+      if (SPA) setView('questions'); else router.push("/questions");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Failed to join team");
     } finally {
@@ -171,6 +184,8 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
   const [leaving, setLeaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const router = useRouter();
+  const { setView } = useAppStore();
+  const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
 
   const leave = async () => {
     setErr(null);
@@ -178,7 +193,7 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
     try {
       await api.post<ApiOk<unknown>>("/api/profile/leave_team", {});
       // Route to profile to clearly indicate no team; profile links back to team
-      router.replace('/profile');
+      if (SPA) setView('profile'); else router.replace('/profile');
       onLeft();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Failed to leave team");
@@ -204,9 +219,9 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
       </div>
 
       <div className="grid gap-2">
-        <h3 className="font-qurova ch-gradient-text">Join via QR</h3>
+        <h3 className="font-qurova ch-gradient-text">Team check‑in QR</h3>
         {qrB64 ? (
-          <img alt="Team join QR" src={`data:image/png;base64,${qrB64}`} className="h-48 w-48 rounded bg-white p-2" />
+          <img alt="Check-in QR" src={`data:image/png;base64,${qrB64}`} className="h-48 w-48 rounded bg-white p-2" />
         ) : (
           <p className="text-sm font-area" style={{ color: MainColors.subText }}>Generating…</p>
         )}

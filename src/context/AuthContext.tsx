@@ -47,7 +47,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = await getIdToken(true);
       setIdToken(token);
       try { window.localStorage.setItem('show_welcome', '1'); } catch {}
-      try { await api.post("/app/onboarding", { phone: "9999999999", gender: "OTHER" }); } catch {}
     },
     signOut: async () => {
       await signOutFirebase();
@@ -55,10 +54,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   }), []);
 
-  useEffect(() => {
-    if (!idToken) return;
-    (async () => { try { await api.post("/app/onboarding", { phone: "9999999999", gender: "OTHER" }); } catch {} })();
-  }, [idToken]);
+  // No-op effect for idToken; onboarding happens via dedicated screen and real user input
+  useEffect(() => { /* idToken available */ }, [idToken]);
 
   const value: AuthContextType = { user, idToken, initialized, ...actions };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

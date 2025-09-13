@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import api from "../../lib/api";
 import type { ApiOk, ProfileData } from "../../lib/types";
 import { useAuth } from "../../context/AuthContext";
+import { useAppStore } from "../../store/appStore";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { initialized, user } = useAuth();
+  const { setView } = useAppStore();
+  const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [notInTeam, setNotInTeam] = useState(false);
@@ -17,7 +20,7 @@ export default function ProfilePage() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      if (initialized && !user) { router.replace('/signin'); return; }
+      if (initialized && !user) { if (SPA) setView('signin'); else router.replace('/signin'); return; }
       try {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;

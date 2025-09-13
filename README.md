@@ -21,7 +21,10 @@ npm install
 
 - `/signin` — Sign in with Google (styled like the mobile LoginScreen)
 - `/signup` — Sign up with Google (same flow)
+- `/onboarding` — Submit phone and gender (mirrors mobile ExtraInfo)
+- `/checkin` — Show check‑in QR for organizers to scan
 - `/` — Home, requires auth and attempts `/api/main` against the backend with `Authorization: Bearer <FirebaseIDToken>`
+- `/spa` — Single Page App container that renders views via Zustand state
 - `/team` — Create team, join by code, view members, QR join, leave
 - `/profile` — View name, email, rank and points
 
@@ -59,6 +62,12 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+### SPA Mode (Zustand)
+
+- Set `NEXT_PUBLIC_SPA=1` in `.env.local` to enable SPA NavBar behavior (uses Zustand to change views without route changes).
+- Visit `/spa` to use the single-page container that renders `signin / signup / onboarding / team / questions / profile / leaderboard` views based on global state and `/api/main` decisions.
+- NavBar switches tabs using the store; external Register link stays a normal link.
 3. Fonts (optional but recommended for exact match)
 
 Place the TTF files in `public/fonts/` using these names so the aliases match the mobile app:

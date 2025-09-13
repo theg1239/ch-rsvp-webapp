@@ -6,6 +6,7 @@ import type { GetQuestionRes, SubmitResponseRes } from "../../../lib/types";
 import LoadingOverlay from "../../../components/LoadingOverlay";
 import Modal from "../../../components/Modal";
 import { useAuth } from "../../../context/AuthContext";
+import { useAppStore } from "../../../store/appStore";
 
 const MainColors = { orange: "#F5753B", text: "#ffffff", subText: "#cccccc" } as const;
 // Global switch to close submissions immediately
@@ -25,6 +26,10 @@ export default function QuestionDetail() {
   const [busy, setBusy] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showIncorrect, setShowIncorrect] = useState(false);
+  const { setHideNav } = useAppStore();
+
+  // Hide NavBar in question detail view
+  useEffect(() => { setHideNav(true); return () => setHideNav(false); }, [setHideNav]);
 
   // fetch question parts
   const refresh = async () => {
