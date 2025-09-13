@@ -40,10 +40,10 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <div className="relative max-w-3xl mx-auto px-6 py-10">
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <div className="relative ch-container ch-container-narrow py-10 safe-bottom">
         <header className="text-center mb-6">
-          <h1 className="font-qurova ch-orange" style={{ fontSize: "36px" }}>Profile</h1>
+          <h1 className="font-qurova ch-orange ch-h1">Profile</h1>
         </header>
         {loading && <p className="ch-subtext font-area">Loading…</p>}
         {err && <p className="text-red-400 font-area">{err}</p>}

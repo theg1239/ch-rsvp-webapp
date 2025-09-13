@@ -35,14 +35,14 @@ export default function SquadLobbyPage() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <div className="relative max-w-3xl mx-auto px-6 pt-10 pb-12">
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <div className="relative ch-container ch-container-narrow pt-10 pb-12 safe-bottom">
         <header className="text-center">
-          <h1 className="font-qurova ch-text" style={{ fontSize: 18 }}>cryptic hunt</h1>
+          <h1 className="font-qurova ch-text ch-h3">cryptic hunt</h1>
         </header>
 
         <main className="mt-6">
-          <h2 className="font-qurova ch-gradient-text text-center" style={{ fontSize: 28 }}>Squad Lobby</h2>
+          <h2 className="font-qurova ch-gradient-text text-center ch-h2">Squad Lobby</h2>
           <div className="mt-2 text-center">
             <p className="font-qurova ch-text" style={{ fontSize: 22, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{teamName}</p>
           </div>
@@ -151,4 +151,3 @@ function mapMembersToGrid(currentUserName: string | null, otherMembers: string[]
   }
   return base;
 }
-

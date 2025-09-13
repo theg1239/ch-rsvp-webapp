@@ -13,29 +13,36 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
+    let first = true;
+    const load = async () => {
       try {
         const res = await api.get<LBRes>("/api/leaderboard/team");
         if (!mounted) return;
         setItems(res.data.team_ranking || []);
         setUserTeam(res.data.user_team || null);
+        setErr(null);
       } catch (e) {
         if (e instanceof Error) setErr(e.message);
         else setErr("Failed to load leaderboard");
-      } finally { setLoading(false); }
-    })();
-    return () => { mounted = false; };
+      } finally {
+        if (first) { setLoading(false); first = false; }
+      }
+    };
+    void load();
+    const id = setInterval(() => { void load(); }, 30_000);
+    return () => { mounted = false; clearInterval(id); };
   }, []);
 
   const top3 = useMemo(() => items.slice(0, 3), [items]);
-  const list = useMemo(() => items.slice(3, 10), [items]);
+  // Show all remaining items and let the page scroll
+  const list = useMemo(() => items.slice(3), [items]);
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <div className="relative max-w-4xl mx-auto px-6 py-10 pb-28">
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <div className="relative ch-container py-10 pb-28 safe-bottom">
         <header className="text-center mb-8">
-          <h1 className="font-qurova ch-gradient-text" style={{ fontSize: 42 }}>cryptic hunt</h1>
+          <h1 className="font-qurova ch-gradient-text ch-h1">cryptic hunt</h1>
           <p className="font-area ch-text" style={{ fontSize: 18 }}>Leaderboard</p>
         </header>
 
@@ -44,11 +51,11 @@ export default function LeaderboardPage() {
 
         {!loading && !err && (
           <>
-            {/* Podium */}
-            <div className="flex items-end justify-center gap-6 mb-10">
-              {top3[1] ? <Podium place={2} item={top3[1]} /> : <div className="w-40" />}
-              {top3[0] ? <Podium place={1} item={top3[0]} /> : <div className="w-40" />}
-              {top3[2] ? <Podium place={3} item={top3[2]} /> : <div className="w-40" />}
+            {/* Podium: left-aligned + horizontally scrollable on mobile, centered on md+ */}
+            <div className="flex items-end gap-6 mb-10 scroll-x snap-x md:snap-none md:justify-center -mx-4 px-4">
+              {top3[1] ? <Podium place={2} item={top3[1]} /> : <div className="w-40 shrink-0" />}
+              {top3[0] ? <Podium place={1} item={top3[0]} /> : <div className="w-40 shrink-0" />}
+              {top3[2] ? <Podium place={3} item={top3[2]} /> : <div className="w-40 shrink-0" />}
             </div>
 
             {/* List 4..10 */}
@@ -77,10 +84,10 @@ function Podium({ place, item }: { place: 1 | 2 | 3; item: LBItem }) {
   };
   const height = place === 1 ? 260 : 220;
   return (
-    <div className="flex flex-col items-center" style={{ width: 180 }}>
+    <div className="flex flex-col items-center snap-center shrink-0" style={{ width: 'clamp(140px, 45vw, 180px)' }}>
       <div className="w-full rounded-2xl flex flex-col items-center justify-end" style={{ height, background: gradients[place] }}>
-        <img src={place === 1 ? "/Images/LeaderBoard/first.svg" : place === 2 ? "/Images/LeaderBoard/second.svg" : "/Images/LeaderBoard/third.svg"} alt={`#${place}`} className="w-20 h-20 -mt-6" />
-        <img src="/Images/LeaderBoard/PodiumPintoo.svg" alt="podium" className="w-32 h-32" />
+        <img src={place === 1 ? "/images/LeaderBoard/first.svg" : place === 2 ? "/images/LeaderBoard/second.svg" : "/images/LeaderBoard/third.svg"} alt={`#${place}`} className="w-20 h-20 -mt-6" />
+        <img src="/images/LeaderBoard/PodiumPintoo.svg" alt="podium" className="w-32 h-32" />
       </div>
       <p className="font-area ch-text text-center mt-2" style={{ fontSize: 18, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180 }}>{item.team_name}</p>
       <p className="font-area" style={{ color: '#F5753B', fontSize: 16 }}>{item.points} pts</p>

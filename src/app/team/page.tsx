@@ -5,6 +5,11 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../lib/api";
 import type { ApiOk, ProfileData } from "../../lib/types";
 
+declare class BarcodeDetector {
+  constructor(options?: { formats?: string[] });
+  detect(video: HTMLVideoElement): Promise<Array<{ rawValue: string }>>;
+}
+
 const MainColors = {
   background: "#241f1a",
   orange: "#F5753B",
@@ -65,11 +70,11 @@ export default function TeamPage() {
 
   return (
     <div className="min-h-dvh ch-bg relative">
-      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/Images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <img src="/Images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
-      <div className="relative max-w-3xl mx-auto px-6 py-10">
+      <div className="absolute inset-0 pointer-events-none select-none opacity-30" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
+      <img src="/images/JoinPage/cryptichuntcorner.svg" alt="cryptic" className="absolute top-3 left-3 w-24 h-auto opacity-90" />
+      <div className="relative ch-container ch-container-narrow py-10 safe-bottom">
         <header className="text-center mb-6">
-          <h1 className="font-qurova ch-gradient-text" style={{ fontSize: "36px" }}>Create your Squad</h1>
+          <h1 className="font-qurova ch-gradient-text ch-h1">Create your Squad</h1>
         </header>
         {content}
       </div>
@@ -83,6 +88,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [scanOpen, setScanOpen] = useState(false);
 
   const createTeam = async () => {
     setErr(null);
@@ -101,9 +107,14 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
   const joinTeam = async () => {
     setErr(null);
     if (!code.trim()) return setErr("Team code is required");
+    await joinWithCode(code.trim());
+  };
+
+  const joinWithCode = async (c: string) => {
     setBusy("Joining team…");
+    setErr(null);
     try {
-      await api.post<ApiOk<unknown>>("/api/user/team/join", { code });
+      await api.post<ApiOk<unknown>>("/api/user/team/join", { code: c });
       router.push("/questions");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Failed to join team");
@@ -115,7 +126,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
   return (
     <div className="grid gap-8">
       <section className="grid gap-3">
-        <h2 className="font-qurova ch-gradient-text">Create a team</h2>
+        <h2 className="font-qurova ch-gradient-text ch-h2">Create a team</h2>
         <input
           className="w-full h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area"
           placeholder="Team name"
@@ -128,7 +139,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
       </section>
 
       <section className="grid gap-3">
-        <h2 className="font-qurova ch-gradient-text">Join with code</h2>
+        <h2 className="font-qurova ch-gradient-text ch-h2">Join with code</h2>
         <CodeInputs value={code} onChange={setCode} length={6} />
         <button onClick={joinTeam} className="h-11 rounded-xl font-qurova ch-btn">Join team</button>
 
@@ -138,8 +149,8 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
           <div className="flex-1 h-px" style={{ backgroundColor: MainColors.subText }} />
         </div>
         <div className="w-full flex items-center justify-center">
-          <button className="rounded-full px-8 py-3 bg-white flex items-center gap-3" type="button">
-            <img src="/Images/JoinPage/scanning.svg" alt="scan" className="w-5 h-5" />
+          <button className="rounded-full px-8 py-3 bg-white flex items-center gap-3" type="button" onClick={()=>setScanOpen(true)}>
+            <img src="/images/JoinPage/scanning.svg" alt="scan" className="w-5 h-5" />
             <span className="font-area" style={{ color: '#2C2824' }}>Join using QR</span>
           </button>
         </div>
@@ -147,6 +158,10 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
 
       {busy && <p className="text-sm" style={{ color: MainColors.subText }}>{busy}</p>}
       {err && <p className="text-sm text-red-400">{err}</p>}
+
+      {scanOpen && (
+        <QRScanModal onClose={()=>setScanOpen(false)} onResult={(val)=>{ setScanOpen(false); const m = (val||'').match(/[A-Z0-9]{6}/i); if (m) { void joinWithCode(m[0].toUpperCase()); } else { setErr('Invalid QR content'); } }} />
+      )}
     </div>
   );
 }
@@ -155,12 +170,15 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
   const team = data.user.team as ProfileData["user"]["team"];
   const [leaving, setLeaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const router = useRouter();
 
   const leave = async () => {
     setErr(null);
     setLeaving(true);
     try {
       await api.post<ApiOk<unknown>>("/api/profile/leave_team", {});
+      // Route to profile to clearly indicate no team; profile links back to team
+      router.replace('/profile');
       onLeft();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Failed to leave team");
@@ -206,10 +224,74 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
   );
 }
 
+function QRScanModal({ onClose, onResult }: { onClose: () => void; onResult: (text: string) => void }) {
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    let currentStream: MediaStream | null = null;
+    const start = async () => {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+        if (!active) return;
+        setStream(s);
+        currentStream = s;
+        const v = (document.getElementById('qr-video') as HTMLVideoElement);
+        if (v) {
+          v.srcObject = s;
+          await v.play();
+        }
+        // Try BarcodeDetector
+      const AnyBD = (window as typeof window & { BarcodeDetector?: typeof BarcodeDetector }).BarcodeDetector;
+        if (AnyBD) {
+          const detector = new AnyBD({ formats: ['qr_code'] });
+          const scan = async () => {
+            if (!active) return;
+            try {
+              const res = await detector.detect(v);
+              if (res && res[0]?.rawValue) {
+                onResult(res[0].rawValue as string);
+                return;
+              }
+            } catch {}
+            requestAnimationFrame(scan);
+          };
+          requestAnimationFrame(scan);
+        } else {
+          setError('QR scanning not supported in this browser. Use code input.');
+        }
+      } catch (e) {
+        setError('Camera access denied. Use code input instead.');
+      }
+    };
+    void start();
+    return () => {
+      active = false;
+      if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+    };
+  }, [onResult]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter:'blur(2px)' }}>
+      <div className="rounded-2xl p-4 ch-card" style={{ width: 'min(560px, 96vw)' }}>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-qurova ch-text text-lg">Scan QR</h3>
+          <button onClick={onClose} className="font-qurova text-sm" style={{ color:'var(--ch-subtext)' }}>Close</button>
+        </div>
+        <div className="grid gap-2">
+          <video id="qr-video" playsInline muted className="w-full rounded-lg bg-black" style={{ aspectRatio: '4 / 3' }} />
+          {error && <p className="font-area text-sm text-red-400">{error}</p>}
+          <p className="font-area ch-subtext text-xs">Point camera at your teammates QR code.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CodeInputs({ value, onChange, length }: { value: string; onChange: (v: string) => void; length: number }) {
   const chars = Array.from({ length }, (_, i) => value[i] || "");
   return (
-    <div className="flex items-center justify-center gap-3">
+    <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
       {chars.map((ch, i) => (
         <input
           key={i}
@@ -224,8 +306,8 @@ function CodeInputs({ value, onChange, length }: { value: string; onChange: (v: 
           }}
           className="text-center font-qurova"
           style={{
-            height: 56,
-            width: 56,
+            height: 'clamp(44px, 9vw, 56px)',
+            width: 'clamp(44px, 9vw, 56px)',
             borderWidth: 2,
             borderColor: MainColors.orange,
             borderRadius: 18,
