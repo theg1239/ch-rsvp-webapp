@@ -49,6 +49,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try { window.localStorage.setItem('show_welcome', '1'); } catch {}
     },
     signOut: async () => {
+      try {
+        const t = typeof window !== 'undefined' ? window.localStorage.getItem('fcm_token') : null;
+        if (t) {
+          const base = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/,'') || '';
+          const doPost = async (tokenOrNull: string | null) => fetch(`${base}/fcm/tokens/unregister`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...(tokenOrNull ? { Authorization: `Bearer ${tokenOrNull}` } : {}) },
+            body: JSON.stringify({ token: t }),
+          });
+          let res = await doPost(await getIdToken());
+          if (res.status === 401 || res.status === 403) {
+            res = await doPost(await getIdToken(true));
+          }
+        }
+      } catch {}
       await signOutFirebase();
       setIdToken(null);
     },

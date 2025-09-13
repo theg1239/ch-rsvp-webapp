@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
 import NavBar from "../components/NavBar";
+import FCMBridge from "../components/FCMBridge";
+import { PhaseProvider } from "../context/PhaseContext";
+import PhaseTransition from "../components/PhaseTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +20,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "🦉 CH Demo | ACM-VIT",
   description: "Try out Cryptic Hunt by ACM-VIT",
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
@@ -30,8 +34,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          {children}
-          <NavBar />
+          <PhaseProvider>
+            {children}
+            <PhaseTransition />
+            <FCMBridge />
+            <NavBar />
+          </PhaseProvider>
         </AuthProvider>
       </body>
     </html>

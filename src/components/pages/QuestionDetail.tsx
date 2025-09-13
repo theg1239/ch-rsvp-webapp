@@ -1,21 +1,21 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import api from "../../../lib/api";
-import type { GetQuestionRes, SubmitResponseRes } from "../../../lib/types";
-import LoadingOverlay from "../../../components/LoadingOverlay";
-import Modal from "../../../components/Modal";
-import { useAuth } from "../../../context/AuthContext";
-import { useAppStore } from "../../../store/appStore";
+import api from "@/lib/api";
+import type { GetQuestionRes, SubmitResponseRes } from "@/lib/types";
+import LoadingOverlay from "@/components/LoadingOverlay";
+import Modal from "@/components/Modal";
+import { useAuth } from "@/context/AuthContext";
+import { useAppStore } from "@/store/appStore";
+import QRScannerOverlay from "@/components/QRScannerOverlay";
+import NFCScannerOverlay from "@/components/NFCScannerOverlay";
 
-const MainColors = { orange: "#F5753B", text: "#ffffff", subText: "#cccccc" } as const;
-// Global switch to close submissions immediately
-const SUBMISSIONS_CLOSED = true;
+const SUBMISSIONS_CLOSED = false;
 
-export default function QuestionDetail() {
+export default function QuestionDetail({ id: propId, onClose }: { id?: string; onClose?: () => void }) {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const id = params?.id as string;
+  const id = (propId || (params?.id as string)) as string;
   const { initialized, user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -26,12 +26,12 @@ export default function QuestionDetail() {
   const [busy, setBusy] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showIncorrect, setShowIncorrect] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [nfcOpen, setNfcOpen] = useState(false);
   const { setHideNav } = useAppStore();
 
-  // Hide NavBar in question detail view
   useEffect(() => { setHideNav(true); return () => setHideNav(false); }, [setHideNav]);
 
-  // fetch question parts
   const refresh = async () => {
     setErr(null); setSubmitMsg(null); setPoints(null); setLoading(true);
     try {
@@ -42,7 +42,6 @@ export default function QuestionDetail() {
     } finally { setLoading(false); }
   };
 
-  // Fetch only after auth is ready to ensure Authorization header is present
   useEffect(() => { if (id && initialized && user) void refresh(); }, [id, initialized, user]);
 
   const currentPart = useMemo(() => {
@@ -59,23 +58,17 @@ export default function QuestionDetail() {
     }
     setSubmitMsg(null); setPoints(null); setBusy(true);
     try {
-      // Normalize answer: remove ALL whitespace and uppercase
       const normalized = answer.replace(/\s+/g, "").toUpperCase();
       const payload: { type: string; data: string; question_part_id: string } = { type: "STRING", data: normalized, question_part_id: currentPart.id };
       const res = await api.post<SubmitResponseRes>("/api/response/", payload);
-      const topMsg: string | undefined = (res as unknown as { message?: string }).message;
-      const rData: unknown = (res as unknown as { data?: unknown }).data;
-      const responseObj: unknown = (rData as { response?: unknown } | undefined)?.response;
-      const isCorrect: boolean = typeof responseObj === 'object' && responseObj !== null && (responseObj as { is_correct?: boolean }).is_correct === true;
-
+      const rData: any = (res as any).data || {};
+      const responseObj: any = rData.response;
+      const isCorrect = !!(responseObj && responseObj.is_correct === true);
       if (!isCorrect) {
-        // Incorrect submission: show the backend message in the error modal
-        setSubmitMsg(topMsg || "Incorrect answer.");
+        setSubmitMsg((res as any).message || "Incorrect answer.");
         setShowIncorrect(true);
       } else {
-        // Correct submission: parse and show points
-        const ptsRaw = (rData as { points?: number | string } | undefined)?.points;
-        const ptsNum = typeof ptsRaw === 'number' ? ptsRaw : (typeof ptsRaw === 'string' ? Number.parseInt(ptsRaw, 10) : null);
+        const ptsRaw = rData.points; const ptsNum = typeof ptsRaw === 'number' ? ptsRaw : (typeof ptsRaw === 'string' ? parseInt(ptsRaw, 10) : null);
         setPoints(Number.isFinite(ptsNum as number) ? (ptsNum as number) : null);
         setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Submitted.");
         setAnswer("");
@@ -88,19 +81,47 @@ export default function QuestionDetail() {
     } finally { setBusy(false); }
   };
 
+  const submitQR = async (qrValue: string, photoUrl?: string) => {
+    if (!currentPart) return;
+    setSubmitMsg(null); setPoints(null); setBusy(true); setScanOpen(false);
+    try {
+      const payload: any = { type: "QR", data: String(qrValue), question_part_id: currentPart.id };
+      if (photoUrl) payload.photo_url = photoUrl;
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, maximumAge: 10_000, timeout: 4_000 });
+        });
+        if (pos && pos.coords) { payload.latitude = pos.coords.latitude; payload.longitude = pos.coords.longitude; }
+      } catch {}
+      const res = await api.post<SubmitResponseRes>("/api/response/", payload);
+      const rData: any = (res as any).data || {};
+      const responseObj: any = rData.response;
+      const isCorrect = !!(responseObj && responseObj.is_correct === true);
+      if (!isCorrect) {
+        setSubmitMsg("Incorrect or already solved."); setShowIncorrect(true);
+      } else {
+        const ptsRaw = rData.points; const ptsNum = typeof ptsRaw === 'number' ? ptsRaw : (typeof ptsRaw === 'string' ? parseInt(ptsRaw, 10) : null);
+        setPoints(Number.isFinite(ptsNum as number) ? (ptsNum as number) : null);
+        setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Submitted.");
+        await refresh(); setShowSuccess(true);
+      }
+    } catch (e) {
+      setSubmitMsg(e instanceof Error ? e.message : "Incorrect or already solved."); setShowIncorrect(true);
+    } finally { setBusy(false); }
+  };
+
   return (
     <div className="min-h-dvh ch-bg relative">
       <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
       <div className="relative ch-container ch-container-narrow py-6 pb-28 safe-bottom">
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => router.back()} aria-label="Back" className="rounded-full p-2 hover:opacity-90">
+          <button onClick={() => { if (onClose) onClose(); else router.back(); }} aria-label="Back" className="rounded-full p-2 hover:opacity-90">
             <img src="/images/QuestionsPage/left-arrow.svg" alt="Back" className="w-5 h-5" />
           </button>
           <h1 className="font-qurova ch-gradient-text ch-h3">{data?.question_name || "Question"}</h1>
         </div>
         {loading && <p className="font-area ch-subtext">Loading…</p>}
         {err && <p className="text-red-400 font-area">{err}</p>}
-
         {currentPart && (
           <div className="grid gap-4">
             <div className="rounded-2xl p-4 ch-card question-content">
@@ -108,18 +129,25 @@ export default function QuestionDetail() {
             </div>
             <div className="grid gap-2">
               <label className="font-area ch-subtext text-sm">Your Answer</label>
-              {SUBMISSIONS_CLOSED && (
-                <p className="font-area text-amber-300 text-sm">Submissions are currently closed.</p>
-              )}
+              {SUBMISSIONS_CLOSED && <p className="font-area text-amber-300 text-sm">Submissions are currently closed.</p>}
               <input disabled={SUBMISSIONS_CLOSED} value={answer} onChange={(e) => setAnswer(e.target.value)} className="h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area disabled:opacity-60" placeholder="Type answer" />
-              <button disabled={SUBMISSIONS_CLOSED} onClick={submit} className="h-11 rounded-xl font-qurova ch-btn">Submit</button>
+              <div className="flex gap-2">
+                <button disabled={SUBMISSIONS_CLOSED} onClick={submit} className="h-11 rounded-xl font-qurova ch-btn flex-1">Submit</button>
+                <button disabled={SUBMISSIONS_CLOSED} onClick={() => setScanOpen(true)} className="h-11 rounded-xl font-qurova flex items-center justify-center px-4" style={{ border: '1px solid rgba(255,255,255,.12)' }}>
+                  <img src="/images/QuestionsPage/qricon.svg" alt="qr" className="w-5 h-5 mr-2" /> Scan QR
+                </button>
+                <button disabled={SUBMISSIONS_CLOSED} onClick={() => setNfcOpen(true)} className="h-11 rounded-xl font-qurova flex items-center justify-center px-4" style={{ border: '1px solid rgba(255,255,255,.12)' }}>
+                  <img src="/images/QuestionsPage/nfc.svg" alt="nfc" className="w-5 h-5 mr-2" /> Scan NFC
+                </button>
+              </div>
             </div>
             {submitMsg && <p className="font-area" style={{ color: points && points > 0 ? '#22c55e' : '#fca5a5' }}>{submitMsg}{points != null ? ` (+${points})` : ''}</p>}
           </div>
         )}
-
       </div>
       <LoadingOverlay show={busy} label="Submitting..." />
+      <QRScannerOverlay open={scanOpen} onClose={() => setScanOpen(false)} onDetect={(v)=> submitQR(v)} />
+      <NFCScannerOverlay open={nfcOpen} onClose={() => setNfcOpen(false)} onRead={(t)=> { setAnswer(String(t)); setNfcOpen(false); }} />
       <Modal open={showSuccess} onClose={()=>setShowSuccess(false)} title="Submitted ✅" success>
         <p className="font-area ch-text">{points != null ? (<span>You earned <span className="font-qurova" style={{ color:'#22c55e' }}>+{points}</span> points.</span>) : 'Submitted successfully.'}</p>
       </Modal>
@@ -134,15 +162,9 @@ function PartContent({ part }: { part: { id: string; content: Array<string | { t
   const isImageUrl = (s: string) => {
     if (!s) return false;
     const url = s.trim();
-    // common cases: file extensions, data URLs
     if (/\.(png|jpe?g|gif|svg|webp)(\?.*)?$/i.test(url)) return true;
     if (url.startsWith('data:image')) return true;
-    // heuristic: if path segment ends with image-like extension even with query/cdn rules
-    try {
-      const u = new URL(url);
-      const pathname = u.pathname || '';
-      if (/\.(png|jpe?g|gif|svg|webp)$/i.test(pathname)) return true;
-    } catch {}
+    try { const u = new URL(url); const pathname = u.pathname || ''; if (/\.(png|jpe?g|gif|svg|webp)$/i.test(pathname)) return true; } catch {}
     return false;
   };
   const normType = (t: unknown) => (typeof t === 'string' ? t.toLowerCase() : '');
@@ -163,28 +185,13 @@ function PartContent({ part }: { part: { id: string; content: Array<string | { t
     <div className="rounded-xl p-4 ch-card">
       <div className="grid gap-3">
         {Array.isArray(part.content) && part.content.map((c, idx) => {
-          // Handle both object and string content
-          if (typeof c === 'string') {
-            return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{c}</p>;
-          }
+          if (typeof c === 'string') { return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{c}</p>; }
           const t = normType((c as { type?: string }).type);
-          const data: string | undefined = (c as { data?: string; text?: string; url?: string }).data ?? (c as { text?: string }).text ?? (c as { url?: string }).url;
-          // Image (including LINK that points to an image)
-          if (data && (t.includes('image') || isImageUrl(data))) {
-            return <img key={idx} src={data} alt="content" className="ch-img" />;
-          }
-          // Link: try to render as image first with safe fallback to anchor
-          if (data && (t.includes('link') || t.includes('url'))) {
-            return <LinkOrImage key={idx} url={data} />;
-          }
-          // Text (including TEXT)
-          if (data && (t === '' || t.includes('text') || t === 'string')) {
-            return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{data}</p>;
-          }
-          // Fallback: if object has data, show it as text, else skip noisy blob
-          if (data) {
-            return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{data}</p>;
-          }
+          const data: string | undefined = (c as any).data ?? (c as any).text ?? (c as any).url;
+          if (data && (t.includes('image') || isImageUrl(data))) { return <img key={idx} src={data} alt="content" className="ch-img" />; }
+          if (data && (t.includes('link') || t.includes('url'))) { return <LinkOrImage key={idx} url={data} />; }
+          if (data && (t === '' || t.includes('text') || t === 'string')) { return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{data}</p>; }
+          if (data) { return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{data}</p>; }
           return null;
         })}
       </div>

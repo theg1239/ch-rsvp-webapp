@@ -68,16 +68,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - Set `NEXT_PUBLIC_SPA=1` in `.env.local` to enable SPA NavBar behavior (uses Zustand to change views without route changes).
 - Visit `/spa` to use the single-page container that renders `signin / signup / onboarding / team / questions / profile / leaderboard` views based on global state and `/api/main` decisions.
 - NavBar switches tabs using the store; external Register link stays a normal link.
-3. Fonts (optional but recommended for exact match)
-
-Place the TTF files in `public/fonts/` using these names so the aliases match the mobile app:
-
-- `public/fonts/Qurova-Regular.ttf`
-- `public/fonts/QurovaMedium.ttf`
-- `public/fonts/AreaVariable.ttf`
-- `public/fonts/AreaVariable-Thin.ttf`
-
-If these files are present, the UI will use the same families as the React Native app (e.g., `Qurova-Regular`, `QurovaMedium`, `AreaVariable`, `AreaVariable-Thin`).
 
 4. Assets (required for exact visuals)
 

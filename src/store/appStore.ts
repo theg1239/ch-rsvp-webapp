@@ -11,7 +11,19 @@ export type AppView =
   | "team"
   | "questions"
   | "profile"
-  | "leaderboard";
+  | "leaderboard"
+  | "announcements"
+  | "faq"
+  | "rules"
+  | "resources"
+  | "sponsors"
+  | "about"
+  | "timeline"
+  | "archive"
+  | "scanner"
+  | "nfc"
+  | "hunting-pass"
+  | "blacklisted";
 
 type AppStore = {
   view: AppView;
@@ -21,6 +33,9 @@ type AppStore = {
   decideFromBackend: () => Promise<void>;
   hideNav: boolean;
   setHideNav: (v: boolean) => void;
+  questionId?: string | null;
+  openQuestion: (id: string) => void;
+  closeQuestion: () => void;
 };
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -30,6 +45,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
   setView: (v) => set({ view: v }),
   hideNav: false,
   setHideNav: (v) => set({ hideNav: v }),
+  questionId: null,
+  openQuestion: (id) => set({ questionId: id, view: 'questions' }),
+  closeQuestion: () => set({ questionId: null }),
   decideFromBackend: async () => {
     if (get().busy) return; // avoid overlap
     set({ busy: true, error: null });
