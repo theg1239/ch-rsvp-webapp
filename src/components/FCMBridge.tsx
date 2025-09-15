@@ -93,6 +93,6 @@ export default function FCMBridge() {
     return () => {
       navigator.serviceWorker?.removeEventListener?.('message', onSwMessage as any);
     };
-  }, [initialized, user, SPA, router, pathname, decideFromBackend]);
+  }, [initialized, user, SPA, router, pathname, decideFromBackend, phase, setView]);
   return null;
 }

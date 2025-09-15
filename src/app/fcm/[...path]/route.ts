@@ -35,20 +35,25 @@ async function proxy(req: NextRequest, path: string[]) {
   return new NextResponse(arrayBuf, { status: res.status, headers: outHeaders });
 }
 
-export async function GET(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(req, params.path || []);
+export async function GET(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  return proxy(req, resolvedParams.path || []);
 }
-export async function POST(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(req, params.path || []);
+export async function POST(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  return proxy(req, resolvedParams.path || []);
 }
-export async function DELETE(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(req, params.path || []);
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  return proxy(req, resolvedParams.path || []);
 }
-export async function PUT(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(req, params.path || []);
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  return proxy(req, resolvedParams.path || []);
 }
-export async function PATCH(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(req, params.path || []);
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  return proxy(req, resolvedParams.path || []);
 }
 export async function OPTIONS() { return NextResponse.json({}, { status: 200 }); }
 
