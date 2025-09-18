@@ -27,38 +27,6 @@ export const demoStartDate = new Date('2025-09-26T00:00:00.000Z');
 
 export const demoQuestions: DemoQuestion[] = [
   {
-    id: 'demo-1',
-    name: 'Welcome to Guest Mode',
-    difficulty: { level: 'Easy' },
-    parts: [
-      {
-        id: 'p-demo-1',
-        content: [
-          'This is a demo question running fully client-side. No backend required.',
-          'Type DEMO or GUEST as the answer to see a success flow.'
-        ],
-      },
-    ],
-    answers: ['DEMO', 'GUEST'],
-    points: 10,
-  },
-  {
-    id: 'demo-2',
-    name: 'Try the Interface',
-    difficulty: { level: 'Easy' },
-    parts: [
-      {
-        id: 'p-demo-2',
-        content: [
-          'Interact with the UI (open/close, submit answers). Any non-empty answer counts here.',
-        ],
-      },
-    ],
-    answers: [], // empty => any non-empty answer is accepted
-    points: 5,
-  },
-  // Imported JSON questions (simplified mapping)
-  {
     id: 'binarycount',
     name: 'binaryCount',
     difficulty: { level: '1' },
@@ -83,7 +51,7 @@ export const demoQuestions: DemoQuestion[] = [
         id: 'p-giffy-1',
         content: [
           'Can you decode a hidden message and find a secret flag in this GIF that might be something more than just a GIF?',
-          { type: 'IMAGE', data: '/@11zon_created-GIF.gif' },
+          { type: 'IMAGE', data: '/11zon_created-GIF.gif' },
         ],
       },
     ],

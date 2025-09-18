@@ -172,6 +172,22 @@ body {
 .question-content .ch-img { max-height: min(60vh, 560px); object-fit: contain; }
 .question-content p, .question-content a, .question-content span, .question-content div { overflow-wrap: anywhere; word-break: break-word; }
 
+/* Custom scrollbar for question detail (container + inner) */
+.custom-scroll, .custom-scroll-inner, .question-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.25) transparent;
+}
+.custom-scroll::-webkit-scrollbar, .custom-scroll-inner::-webkit-scrollbar, .question-content::-webkit-scrollbar { width: 10px; }
+.custom-scroll::-webkit-scrollbar-track, .custom-scroll-inner::-webkit-scrollbar-track, .question-content::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb, .custom-scroll-inner::-webkit-scrollbar-thumb, .question-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05));
+  border-radius: 999px;
+  border: 2px solid rgba(0,0,0,0.2);
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover, .custom-scroll-inner::-webkit-scrollbar-thumb:hover, .question-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--ch-orange), rgba(255,255,255,0.15));
+}
+
 /* Auth hero (six-owls) with responsive crop; larger and higher on desktop */
 .auth-hero { position: relative; overflow: hidden; height: clamp(200px, 38vh, 340px); }
 .auth-hero img { display: block; width: min(560px, 118%); height: auto; margin: 0 auto; transform: translateY(-12%); }

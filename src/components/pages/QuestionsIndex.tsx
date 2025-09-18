@@ -1,13 +1,15 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import api from "@/lib/api";
 import type { MainGeneric } from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
 import PhaseHeader from "@/components/PhaseHeader";
 import PhaseTimer from "@/components/PhaseTimer";
 import { useAppStore } from "@/store/appStore";
+
+const QuestionDetail = dynamic(() => import("@/components/pages/QuestionDetail"), { ssr: false });
 
 export default function QuestionsIndex() {
   const { initialized, user } = useAuth();
@@ -18,8 +20,7 @@ export default function QuestionsIndex() {
   const [solved, setSolved] = useState<Array<{ id: string; name: string; difficulty?: { level?: string } }>>([]);
   const [openId, setOpenId] = useState("");
   const [phaseInfo, setPhaseInfo] = useState<{ phase?: number; next?: string } | null>(null);
-  const { guestMode } = useAppStore() as any;
-  const router = useRouter();
+  const { guestMode, questionId, openQuestion, closeQuestion } = useAppStore() as any;
 
   useEffect(() => {
     let mounted = true;
@@ -75,12 +76,12 @@ export default function QuestionsIndex() {
           <div className="mt-4 grid gap-2">
             <div className="flex gap-2 items-center">
               <input value={openId} onChange={(e) => setOpenId(e.target.value)} className="h-11 flex-1 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area" placeholder="Enter question ID" />
-              <button onClick={()=> openId && router.push(`/hunt/questions/${openId}`)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
+              <button onClick={()=> openId && openQuestion(openId)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
             </div>
           </div>
         )}
 
-        <div className="scroll-area-y mt-4">
+  <div className="scroll-area-y mt-4 pb-40">
           {questions.length > 0 && (
             <ul className="grid gap-3">
               {questions.map((q) => (
@@ -89,7 +90,7 @@ export default function QuestionsIndex() {
                     <p className="ch-text font-qurova text-lg">{q.name}</p>
                     <p className="font-area ch-subtext text-sm">{q.difficulty?.level || ''}</p>
                   </div>
-                  <button onClick={()=> router.push(`/hunt/questions/${q.id}`)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
+                  <button onClick={()=> openQuestion(q.id)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
                 </li>
               ))}
             </ul>
@@ -110,9 +111,15 @@ export default function QuestionsIndex() {
               </ul>
             </div>
           )}
+          {/* Spacer so bottom nav does not cover last item */}
+          <div aria-hidden className="h-32" />
         </div>
       </div>
-      {/* Question detail now handled via dynamic route /hunt/questions/[id] */}
+      {questionId && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(0,0,0,0.6)] backdrop-blur-sm" aria-modal="true" role="dialog">
+          <QuestionDetail id={questionId} onClose={closeQuestion} />
+        </div>
+      )}
     </div>
   );
 }

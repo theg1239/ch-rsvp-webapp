@@ -8,9 +8,7 @@ export default function AboutPage() {
           <h1 className="font-qurova ch-gradient-text ch-h2">About Cryptic Hunt</h1>
         </div>
         <p className="font-area ch-subtext leading-relaxed">
-          Cryptic Hunt is ACM-VIT’s annual puzzle adventure. Form squads, solve creative riddles across themed
-          phases, and race to the leaderboard. This web experience mirrors the mobile app with push notifications,
-          responsive UI, and quick access to team and questions.
+Cryptic Hunt is VIT's largest scavenger hunt, offering a truly unique experience. Across 36 hours, participants race across campus scanning QR codes and solving text-based puzzles through our custom-built app. Teams crack riddles, chase clues, and battle to secure their spot at the top of the leaderboard.
         </p>
       </div>
     </div>

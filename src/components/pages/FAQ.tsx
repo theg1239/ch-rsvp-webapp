@@ -9,18 +9,16 @@ export default function FAQPage() {
         </div>
         <ul className="grid gap-3">
           <li className="ch-card ch-card--outlined p-4 rounded-xl">
-            <p className="font-qurova ch-text">What is Cryptic Hunt?</p>
-            <p className="font-area ch-subtext text-sm mt-1">A team-based puzzle adventure hosted by ACM-VIT.
-            Solve multi-part questions across thematic phases with your squad.</p>
+            <p className="font-qurova ch-text">How many members will each team consist?</p>
+            <p className="font-area ch-subtext text-sm mt-1">Teams will be formed with exactly 5 members.</p>
           </li>
           <li className="ch-card ch-card--outlined p-4 rounded-xl">
-            <p className="font-qurova ch-text">How many members per team?</p>
-            <p className="font-area ch-subtext text-sm mt-1">Follow the limits declared for the year; typically 3–5.</p>
+            <p className="font-qurova ch-text">What if I don&apos;t have a team?</p>
+            <p className="font-area ch-subtext text-sm mt-1">You just need to show up at the venue during the opening ceremony and we will find the right team for you.</p>
           </li>
           <li className="ch-card ch-card--outlined p-4 rounded-xl">
-            <p className="font-qurova ch-text">How do notifications work?</p>
-            <p className="font-area ch-subtext text-sm mt-1">Enable push in your browser; we use Firebase Cloud Messaging
-            to route you when phases start and responses land.</p>
+            <p className="font-qurova ch-text">Am I allowed to use the internet?</p>
+            <p className="font-area ch-subtext text-sm mt-1">Yes, you can use all the resources at your disposal.</p>
           </li>
         </ul>
       </div>

@@ -111,9 +111,9 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
   };
 
   return (
-    <div className="min-h-dvh ch-bg relative">
+  <div className="min-h-dvh ch-bg relative custom-scroll">
       <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
-      <div className="relative ch-container ch-container-narrow py-6 pb-28 safe-bottom">
+  <div className="relative ch-container ch-container-narrow py-6 pb-28 safe-bottom custom-scroll-inner">
         <div className="flex items-center gap-3 mb-4">
           <button onClick={() => { if (onClose) onClose(); else router.back(); }} aria-label="Back" className="rounded-full p-2 hover:opacity-90">
             <img src="/images/QuestionsPage/left-arrow.svg" alt="Back" className="w-5 h-5" />
@@ -199,7 +199,13 @@ function PartContent({ part }: { part: { id: string; content: Array<string | { t
             return (
               <div key={idx} className="flex items-center justify-between gap-3 rounded-lg px-4 py-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <div className="flex items-center gap-3 min-w-0">
-                  <img src="/images/QuestionsPage/file.svg" alt="file" className="w-6 h-6 opacity-80" />
+                  {/* Inline file icon (was referencing missing /images/QuestionsPage/file.svg) */}
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="w-6 h-6 opacity-80 text-white" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2Z" />
+                    <path d="M13 2v6h6" />
+                    <path d="M9 14h6" />
+                    <path d="M9 18h3" />
+                  </svg>
                   <div className="min-w-0">
                     <p className="font-area ch-text text-sm truncate">{data.split('/').pop()}</p>
                     <p className="font-area ch-subtext text-xs">PDF Attachment</p>
