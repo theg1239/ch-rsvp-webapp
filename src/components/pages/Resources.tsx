@@ -1,3 +1,7 @@
+import dynamic from "next/dynamic";
+
+const RegistrationPrompt = dynamic(() => import("../RegistrationPrompt"), { ssr: false });
+
 export default function ResourcesPage() {
   const items = [
     { href: "https://acmvit.in/", label: "ACM-VIT" },
@@ -11,6 +15,7 @@ export default function ResourcesPage() {
           <img src="/images/resources.svg" alt="Resources" className="w-10 h-10" />
           <h1 className="font-qurova ch-gradient-text ch-h2">Resources</h1>
         </div>
+        <RegistrationPrompt view="resources" className="mb-6" />
         <ul className="grid gap-2">
           {items.map((it) => (
             <li key={it.href} className="ch-card ch-card--outlined p-4 rounded-xl">
@@ -22,4 +27,3 @@ export default function ResourcesPage() {
     </div>
   );
 }
-

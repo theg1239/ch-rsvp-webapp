@@ -1,3 +1,7 @@
+import dynamic from "next/dynamic";
+
+const RegistrationPrompt = dynamic(() => import("../RegistrationPrompt"), { ssr: false });
+
 export default function RulesPage() {
   return (
     <div className="min-h-dvh ch-bg">
@@ -6,6 +10,7 @@ export default function RulesPage() {
           <img src="/images/rulesPageMascot.svg" alt="Rules" className="w-10 h-10" />
           <h1 className="font-qurova ch-gradient-text ch-h2">Rules</h1>
         </div>
+        <RegistrationPrompt view="rules" className="mb-6" />
         <ol className="grid gap-3 list-decimal ml-5">
           <li className="font-area ch-subtext">Respect other teams and event staff.</li>
           <li className="font-area ch-subtext">No sharing of answers across teams.</li>
@@ -16,4 +21,3 @@ export default function RulesPage() {
     </div>
   );
 }
-

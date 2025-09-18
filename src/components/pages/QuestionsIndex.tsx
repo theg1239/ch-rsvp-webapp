@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import PhaseHeader from "@/components/PhaseHeader";
 import PhaseTimer from "@/components/PhaseTimer";
 import { useAppStore } from "@/store/appStore";
+import RegistrationPrompt from "@/components/RegistrationPrompt";
 
 const QuestionDetail = dynamic(() => import("@/components/pages/QuestionDetail"), { ssr: false });
 
@@ -69,6 +70,7 @@ export default function QuestionsIndex() {
             </div>
           </div>
         )}
+        <RegistrationPrompt view="questions" className="mb-6" />
         {loading && <p className="font-area ch-subtext">Loading…</p>}
         {err && <p className="text-red-400 font-area">{err}</p>}
         {note && <p className="font-area ch-subtext">{note}</p>}
@@ -88,7 +90,12 @@ export default function QuestionsIndex() {
                 <li key={q.id} className="rounded-xl p-4 flex items-center justify-between ch-card">
                   <div>
                     <p className="ch-text font-qurova text-lg">{q.name}</p>
-                    <p className="font-area ch-subtext text-sm">{q.difficulty?.level || ''}</p>
+                    <p className="font-area ch-subtext text-sm">
+                      {(() => {
+                        const lvl = q.difficulty?.level?.toString() ?? '';
+                        return /^\d+$/.test(lvl) ? `Level ${lvl}` : lvl;
+                      })()}
+                    </p>
                   </div>
                   <button onClick={()=> openQuestion(q.id)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
                 </li>
@@ -103,7 +110,12 @@ export default function QuestionsIndex() {
                   <li key={q.id} className="rounded-xl p-4 flex items-center justify-between" style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid #2e7d32' }}>
                     <div>
                       <p className="ch-text font-qurova text-lg">{q.name}</p>
-                      <p className="font-area ch-subtext text-sm">{q.difficulty?.level || ''}</p>
+                      <p className="font-area ch-subtext text-sm">
+                        {(() => {
+                          const lvl = q.difficulty?.level?.toString() ?? '';
+                          return /^\d+$/.test(lvl) ? `Level ${lvl}` : lvl;
+                        })()}
+                      </p>
                     </div>
                     <span className="font-qurova" style={{ color: '#22c55e' }}>Completed</span>
                   </li>
@@ -111,8 +123,7 @@ export default function QuestionsIndex() {
               </ul>
             </div>
           )}
-          {/* Small natural spacer for visual breathing room below list */}
-          <div aria-hidden className="h-6" />
+          {/* Spacer removed; bottom padding handled by questions-scroll */}
         </div>
       </div>
       {questionId && (

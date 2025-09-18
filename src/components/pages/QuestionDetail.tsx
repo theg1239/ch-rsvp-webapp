@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import api from "@/lib/api";
 import type { GetQuestionRes, SubmitResponseRes } from "@/lib/types";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import { fireConfetti } from "@/lib/confetti";
 import Modal from "@/components/Modal";
 import { useAuth } from "@/context/AuthContext";
 import { useAppStore } from "@/store/appStore";
@@ -22,6 +23,7 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
   const [data, setData] = useState<GetQuestionRes["data"] | null>(null);
   const [answer, setAnswer] = useState("");
   const [submitMsg, setSubmitMsg] = useState<string | null>(null);
+  const [lastCorrect, setLastCorrect] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -56,7 +58,7 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
       setShowIncorrect(true);
       return;
     }
-    setSubmitMsg(null); setPoints(null); setBusy(true);
+  setSubmitMsg(null); setPoints(null); setBusy(true); setLastCorrect(false);
     try {
       const normalized = answer.replace(/\s+/g, "").toUpperCase();
       const payload: { type: string; data: string; question_part_id: string } = { type: "STRING", data: normalized, question_part_id: currentPart.id };
@@ -70,10 +72,12 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
       } else {
         const ptsRaw = rData.points; const ptsNum = typeof ptsRaw === 'number' ? ptsRaw : (typeof ptsRaw === 'string' ? parseInt(ptsRaw, 10) : null);
         setPoints(Number.isFinite(ptsNum as number) ? (ptsNum as number) : null);
-        setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Submitted.");
+        setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Correct!");
         setAnswer("");
         await refresh();
-        setShowSuccess(true);
+        setLastCorrect(true);
+  setShowSuccess(true);
+  if (process.env.NODE_ENV === 'development') fireConfetti();
       }
     } catch (e) {
       setSubmitMsg(e instanceof Error ? e.message : "Incorrect or already solved.");
@@ -83,7 +87,7 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
 
   const submitQR = async (qrValue: string, photoUrl?: string) => {
     if (!currentPart) return;
-    setSubmitMsg(null); setPoints(null); setBusy(true); setScanOpen(false);
+  setSubmitMsg(null); setPoints(null); setBusy(true); setScanOpen(false); setLastCorrect(false);
     try {
       const payload: any = { type: "QR", data: String(qrValue), question_part_id: currentPart.id };
       if (photoUrl) payload.photo_url = photoUrl;
@@ -102,8 +106,9 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
       } else {
         const ptsRaw = rData.points; const ptsNum = typeof ptsRaw === 'number' ? ptsRaw : (typeof ptsRaw === 'string' ? parseInt(ptsRaw, 10) : null);
         setPoints(Number.isFinite(ptsNum as number) ? (ptsNum as number) : null);
-        setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Submitted.");
-        await refresh(); setShowSuccess(true);
+        setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Correct!");
+  await refresh(); setLastCorrect(true); setShowSuccess(true);
+  if (process.env.NODE_ENV === 'development') fireConfetti();
       }
     } catch (e) {
       setSubmitMsg(e instanceof Error ? e.message : "Incorrect or already solved."); setShowIncorrect(true);
@@ -152,8 +157,19 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
       <LoadingOverlay show={busy} label="Submitting..." />
       <QRScannerOverlay open={scanOpen} onClose={() => setScanOpen(false)} onDetect={(v)=> submitQR(v)} />
       <NFCScannerOverlay open={nfcOpen} onClose={() => setNfcOpen(false)} onRead={(t)=> { setAnswer(String(t)); setNfcOpen(false); }} />
-      <Modal open={showSuccess} onClose={()=>setShowSuccess(false)} title="Submitted ✅" success>
-        <p className="font-area ch-text">{points != null ? (<span>You earned <span className="font-qurova" style={{ color:'#22c55e' }}>+{points}</span> points.</span>) : 'Submitted successfully.'}</p>
+      <Modal open={showSuccess} onClose={()=>setShowSuccess(false)} title={lastCorrect ? "Correct" : "Submitted"} success>
+        <div className="font-area ch-text space-y-2">
+          {lastCorrect && (
+            <>
+              <p className="font-qurova text-lg" style={{color:'#F5753B'}}>Solved</p>
+              {points != null && (
+                <p>You earned <span className="font-qurova" style={{ color:'#22c55e' }}>+{points}</span> points.</p>
+              )}
+              {/* {points == null && <p>Correct!</p>} */}
+            </>
+          )}
+          {!lastCorrect && <p>{submitMsg || 'Submitted.'}</p>}
+        </div>
       </Modal>
       <Modal open={showIncorrect} onClose={()=>setShowIncorrect(false)} title="Try again">
         <p className="font-area ch-text">{submitMsg || "That doesn’t match. Check the question again! Ensure no spaces in the answer."}</p>

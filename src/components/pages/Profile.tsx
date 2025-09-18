@@ -6,6 +6,7 @@ import api from "@/lib/api";
 import type { ApiOk, ProfileData } from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
 import { useAppStore } from "@/store/appStore";
+import RegistrationPrompt from "@/components/RegistrationPrompt";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -42,6 +43,7 @@ export default function ProfilePage() {
         <header className="text-center mb-6">
           <h1 className="font-qurova ch-orange ch-h1">Profile</h1>
         </header>
+        <RegistrationPrompt view="profile" className="mb-6" />
         {loading && <p className="ch-subtext font-area">Loading…</p>}
         {err && <p className="text-red-400 font-area">{err}</p>}
         {notInTeam && (
@@ -82,4 +84,3 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-

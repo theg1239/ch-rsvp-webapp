@@ -4,6 +4,7 @@ import api from "@/lib/api";
 import PhaseHeader from "@/components/PhaseHeader";
 import PhaseTimer from "@/components/PhaseTimer";
 import type { MainGeneric } from "@/lib/types";
+import RegistrationPrompt from "@/components/RegistrationPrompt";
 
 export default function TimelinePage() {
   const [data, setData] = useState<null | { current?: string; next?: string; phase?: number }>(null);
@@ -23,6 +24,7 @@ export default function TimelinePage() {
   return (
     <div className="min-h-dvh ch-bg">
       <div className="ch-container ch-container-narrow py-10 pb-28 safe-bottom grid gap-4">
+        <RegistrationPrompt view="timeline" className="mb-2" />
         <PhaseHeader phase={data?.phase ?? '—'} title="Upcoming Phase" subtitle={data?.next ? new Date(data.next).toLocaleString() : '—'} />
         {err && <p className="text-red-400 font-area">{err}</p>}
         {data?.next && <PhaseTimer until={data.next} />}
@@ -34,4 +36,3 @@ export default function TimelinePage() {
     </div>
   );
 }
-
