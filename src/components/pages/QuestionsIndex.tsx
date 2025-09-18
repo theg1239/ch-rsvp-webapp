@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import api from "@/lib/api";
 import type { MainGeneric } from "@/lib/types";
@@ -22,6 +22,40 @@ export default function QuestionsIndex() {
   const [openId, setOpenId] = useState("");
   const [phaseInfo, setPhaseInfo] = useState<{ phase?: number; next?: string } | null>(null);
   const { guestMode, questionId, openQuestion, closeQuestion } = useAppStore() as any;
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const [listHeight, setListHeight] = useState<number | undefined>(undefined);
+
+  const measureListHeight = useCallback(() => {
+    if (!listRef.current) return;
+    const rect = listRef.current.getBoundingClientRect();
+    const top = rect.top;
+    // Try to measure bottom nav; fallback to a safe estimate
+    let navH = 0;
+    const nav = document.querySelector('nav[aria-label="Hunt"]') as HTMLElement | null;
+    if (nav) navH = nav.getBoundingClientRect().height || 0;
+    // padding/safe area buffer so last item doesn’t sit under nav
+    const buffer = 24; // px
+    const avail = window.innerHeight - top - navH - buffer;
+    const min = 280; // don’t go too tiny
+    setListHeight(Math.max(min, avail));
+  }, []);
+
+  useLayoutEffect(() => {
+    measureListHeight();
+    const onResize = () => measureListHeight();
+    window.addEventListener('resize', onResize);
+    // Re-measure after initial content settles
+    const t1 = setTimeout(measureListHeight, 50);
+    const t2 = setTimeout(measureListHeight, 250);
+    // Observe layout shifts (e.g., banners/prompt appearing)
+    const ro = new ResizeObserver(() => measureListHeight());
+    if (document.body) ro.observe(document.body);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      clearTimeout(t1); clearTimeout(t2);
+      try { ro.disconnect(); } catch {}
+    };
+  }, [measureListHeight]);
 
   useEffect(() => {
     let mounted = true;
@@ -83,7 +117,7 @@ export default function QuestionsIndex() {
           </div>
         )}
 
-  <div className="questions-scroll mt-4 pr-1">
+  <div ref={listRef} className="questions-scroll mt-4 pr-1 overflow-y-auto" style={{ height: listHeight }}>
           {questions.length > 0 && (
             <ul className="grid gap-3">
               {questions.map((q) => (
