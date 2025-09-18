@@ -20,7 +20,7 @@ export default function QuestionsIndex() {
   const [solved, setSolved] = useState<Array<{ id: string; name: string; difficulty?: { level?: string } }>>([]);
   const [openId, setOpenId] = useState("");
   const [phaseInfo, setPhaseInfo] = useState<{ phase?: number; next?: string } | null>(null);
-  const { questionId, openQuestion, closeQuestion } = useAppStore();
+  const { questionId, openQuestion, closeQuestion, guestMode } = useAppStore() as any;
 
   useEffect(() => {
     let mounted = true;
@@ -55,10 +55,18 @@ export default function QuestionsIndex() {
           <Image src="/images/QuestionsPage/refresh.svg" alt="refresh" width={20} height={20} className="w-5 h-5 opacity-80" onClick={() => location.reload()} />
           <h1 className="font-qurova ch-gradient-text ch-h2">Questions</h1>
         </div>
-        {phaseInfo && (
+        {!guestMode && phaseInfo && (
           <div className="grid gap-3 mb-4">
             <PhaseHeader phase={phaseInfo.phase ?? '—'} title="Phase Progress" subtitle={phaseInfo.next ? `Next: ${new Date(phaseInfo.next).toLocaleString()}` : undefined} />
             {phaseInfo.next && <PhaseTimer until={phaseInfo.next} />}
+          </div>
+        )}
+        {guestMode && (
+          <div className="grid gap-3 mb-6">
+            <div className="rounded-2xl p-4 ch-card ch-card--outlined" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+              <h2 className="font-qurova ch-gradient-text ch-h3 mb-1">Cryptic Hunt Starts Soon</h2>
+              <p className="font-area ch-subtext text-sm">The hunt begins on <strong className="font-qurova" style={{ color: '#F5753B' }}>26 Sept 2025</strong>. Explore this demo interface meanwhile.</p>
+            </div>
           </div>
         )}
         {loading && <p className="font-area ch-subtext">Loading…</p>}
