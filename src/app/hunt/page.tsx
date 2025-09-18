@@ -24,17 +24,23 @@ import { useAppStore } from "@/store/appStore";
 
 export default function HuntIndex() {
   const { user, initialized } = useAuth();
-  const { view, decideFromBackend } = useAppStore();
+  const { view, decideFromBackend, guestMode, setView } = useAppStore() as any;
 
   useEffect(() => {
     if (!initialized) return;
     if (!user) return;
+    if (guestMode) {
+      const allowed = new Set(['questions','about','faq']);
+      if (!allowed.has(view)) setView('questions');
+      return; // skip backend in guest mode
+    }
     void decideFromBackend();
-  }, [initialized, user, decideFromBackend]);
+  }, [initialized, user, decideFromBackend, guestMode, view, setView]);
 
   if (!initialized || !user) return <SplashScreen label="Signing you in…" />;
 
-  switch (view) {
+  const effView = guestMode && !['questions','about','faq'].includes(view) ? 'questions' : view;
+  switch (effView) {
     case 'questions': return <QuestionsIndex />;
     case 'leaderboard': return <LeaderboardPage />;
     case 'profile': return <ProfilePage />;

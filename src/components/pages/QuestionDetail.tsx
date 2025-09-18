@@ -28,7 +28,7 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
   const [showIncorrect, setShowIncorrect] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [nfcOpen, setNfcOpen] = useState(false);
-  const { setHideNav } = useAppStore();
+  const { setHideNav, guestMode } = useAppStore() as any;
 
   useEffect(() => { setHideNav(true); return () => setHideNav(false); }, [setHideNav]);
 
@@ -133,12 +133,16 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
               <input disabled={SUBMISSIONS_CLOSED} value={answer} onChange={(e) => setAnswer(e.target.value)} className="h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area disabled:opacity-60" placeholder="Type answer" />
               <div className="flex gap-2">
                 <button disabled={SUBMISSIONS_CLOSED} onClick={submit} className="h-11 rounded-xl font-qurova ch-btn flex-1">Submit</button>
-                <button disabled={SUBMISSIONS_CLOSED} onClick={() => setScanOpen(true)} className="h-11 rounded-xl font-qurova flex items-center justify-center px-4" style={{ border: '1px solid rgba(255,255,255,.12)' }}>
-                  <img src="/images/QuestionsPage/qricon.svg" alt="qr" className="w-5 h-5 mr-2" /> Scan QR
-                </button>
-                <button disabled={SUBMISSIONS_CLOSED} onClick={() => setNfcOpen(true)} className="h-11 rounded-xl font-qurova flex items-center justify-center px-4" style={{ border: '1px solid rgba(255,255,255,.12)' }}>
-                  <img src="/images/QuestionsPage/nfc.svg" alt="nfc" className="w-5 h-5 mr-2" /> Scan NFC
-                </button>
+                {!guestMode && (
+                  <>
+                    <button disabled={SUBMISSIONS_CLOSED} onClick={() => setScanOpen(true)} className="h-11 rounded-xl font-qurova flex items-center justify-center px-4" style={{ border: '1px solid rgba(255,255,255,.12)' }}>
+                      <img src="/images/QuestionsPage/qricon.svg" alt="qr" className="w-5 h-5 mr-2" /> Scan QR
+                    </button>
+                    <button disabled={SUBMISSIONS_CLOSED} onClick={() => setNfcOpen(true)} className="h-11 rounded-xl font-qurova flex items-center justify-center px-4" style={{ border: '1px solid rgba(255,255,255,.12)' }}>
+                      <img src="/images/QuestionsPage/nfc.svg" alt="nfc" className="w-5 h-5 mr-2" /> Scan NFC
+                    </button>
+                  </>
+                )}
               </div>
             </div>
             {submitMsg && <p className="font-area" style={{ color: points && points > 0 ? '#22c55e' : '#fca5a5' }}>{submitMsg}{points != null ? ` (+${points})` : ''}</p>}

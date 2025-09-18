@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useAppStore } from "@/store/appStore";
 
 type Item = { view: ReturnType<typeof useAppStore.getState>["view"]; label: string; icon: string };
-const items: Item[] = [
+const baseItems: Item[] = [
   { view: "timeline", label: "Timeline", icon: "/images/NavBar/calendar-2.svg" },
   { view: "questions", label: "Home", icon: "/images/NavBar/home.svg" },
   { view: "leaderboard", label: "Leaderboard", icon: "/images/NavBar/cup.svg" },
@@ -17,13 +17,18 @@ const items: Item[] = [
 ];
 
 export default function HuntNav() {
-  const { view, setView, decideFromBackend } = useAppStore();
+  const { view, setView, decideFromBackend, guestMode } = useAppStore();
+  const items = useMemo(() => {
+    if (!guestMode) return baseItems;
+    // Guest mode: only minimal informational pages
+    return baseItems.filter(it => ["about", "faq"].includes(it.view));
+  }, [guestMode]);
   const go = (v: Item["view"]) => { if (v === 'questions') { void decideFromBackend(); } else { setView(v); } };
   const isActive = (v: Item["view"]) => v === 'questions'
     ? (view === 'questions' || view === 'team' || view === 'profile' || view === 'checkin')
     : view === v;
-  const left = useMemo(() => items.slice(0, 4), []);
-  const right = useMemo(() => items.slice(4, 8), []);
+  const left = useMemo(() => items.slice(0, Math.ceil(items.length / 2)), [items]);
+  const right = useMemo(() => items.slice(Math.ceil(items.length / 2)), [items]);
 
   return (
     <nav className="fixed nav-safe-offset left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4" aria-label="Hunt">

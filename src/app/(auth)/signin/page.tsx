@@ -11,11 +11,13 @@ export default function SignInPage() {
   const router = useRouter();
   const { signInWithGoogle, user, initialized } = useAuth();
   const { decideFromBackend, setHideNav } = useAppStore();
+  const guestMode = (process.env.NEXT_PUBLIC_GUEST_MODE === '1') || (process.env.GUEST_MODE === '1');
 
   // Hide Nav while on SignIn
   useEffect(() => { setHideNav(true); return () => setHideNav(false); }, [setHideNav]);
 
   const handleSignIn = async () => {
+    if (guestMode) { router.replace('/hunt'); return; }
     await signInWithGoogle();
     await decideFromBackend();
     router.replace('/hunt');
@@ -24,8 +26,8 @@ export default function SignInPage() {
   // If already signed in, skip page
   useEffect(() => {
     if (!initialized) return;
-    if (user) { router.replace('/hunt'); }
-  }, [initialized, user, router]);
+    if (user || guestMode) { router.replace('/hunt'); }
+  }, [initialized, user, guestMode, router]);
 
   return (
     <div className="min-h-dvh ch-bg relative">
@@ -61,17 +63,19 @@ export default function SignInPage() {
       </div>
 
       {/* Bottom sticky action like the phone version */}
-      <div className="fixed left-0 right-0 nav-safe-offset px-5" style={{ bottom: '2vh' }}>
-        <div className="ch-card ch-glass rounded-2xl p-3">
-          <button
-            onClick={handleSignIn}
-            className="w-full h-12 rounded-xl flex items-center justify-center gap-3 btn-ripple ch-btn"
-          >
-            <Image src="/images/google-logo.svg" alt="Google" width={20} height={20} />
-            <span className="font-qurova">Log in with Google</span>
-          </button>
+      {!guestMode && (
+        <div className="fixed left-0 right-0 nav-safe-offset px-5" style={{ bottom: '2vh' }}>
+          <div className="ch-card ch-glass rounded-2xl p-3">
+            <button
+              onClick={handleSignIn}
+              className="w-full h-12 rounded-xl flex items-center justify-center gap-3 btn-ripple ch-btn"
+            >
+              <Image src="/images/google-logo.svg" alt="Google" width={20} height={20} />
+              <span className="font-qurova">Log in with Google</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

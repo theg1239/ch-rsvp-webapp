@@ -19,24 +19,42 @@ export function PhaseProvider({ children }: { children: React.ReactNode }) {
   const [currentTime, setCurrentTime] = useState<string | undefined>(undefined);
   const [nextTime, setNextTime] = useState<string | undefined>(undefined);
   const inflight = useRef<Promise<void> | null>(null);
+  const guestMode = (process.env.NEXT_PUBLIC_GUEST_MODE === '1') || (process.env.GUEST_MODE === '1');
 
   const refresh = useCallback(async () => {
     if (inflight.current) return inflight.current;
     const p = (async () => {
       try {
-        const res = await api.get<MainGeneric>("/api/main");
-        setStatus(res.message || "");
-        const d: any = res.data || {};
-        setPhase(d.active_phase);
-        setCurrentTime(d.current_phase_time);
-        setNextTime(d.next_phase_time);
+        if (guestMode) {
+          const start = new Date('2025-09-26T00:00:00.000Z').getTime();
+            // Use user's local time to determine state
+          const now = Date.now();
+          if (now < start) {
+            setStatus('PHASE_NOT_STARTED');
+            setPhase(undefined);
+            setCurrentTime(new Date().toISOString());
+            setNextTime(new Date(start).toISOString());
+          } else {
+            setStatus('PHASE_ACTIVE');
+            setPhase(1);
+            setCurrentTime(new Date().toISOString());
+            setNextTime(new Date(now + 60 * 60 * 1000).toISOString());
+          }
+        } else {
+          const res = await api.get<MainGeneric>("/api/main");
+          setStatus(res.message || "");
+          const d: any = res.data || {};
+          setPhase(d.active_phase);
+          setCurrentTime(d.current_phase_time);
+          setNextTime(d.next_phase_time);
+        }
       } catch (e) {
         // keep prior values; do not throw
       } finally { inflight.current = null; }
     })();
     inflight.current = p;
     return p;
-  }, []);
+  }, [guestMode]);
 
   useEffect(() => { void refresh(); const id = setInterval(() => void refresh(), 60_000); return () => clearInterval(id); }, [refresh]);
 

@@ -36,12 +36,14 @@ type AppStore = {
   questionId?: string | null;
   openQuestion: (id: string) => void;
   closeQuestion: () => void;
+  guestMode: boolean;
 };
 
 export const useAppStore = create<AppStore>((set, get) => ({
-  view: "signin",
+  view: (process.env.NEXT_PUBLIC_GUEST_MODE === '1' || process.env.GUEST_MODE === '1') ? 'questions' : 'signin',
   busy: false,
   error: null,
+  guestMode: (process.env.NEXT_PUBLIC_GUEST_MODE === '1') || (process.env.GUEST_MODE === '1'),
   setView: (v) => set({ view: v }),
   hideNav: false,
   setHideNav: (v) => set({ hideNav: v }),
@@ -49,6 +51,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   openQuestion: (id) => set({ questionId: id, view: 'questions' }),
   closeQuestion: () => set({ questionId: null }),
   decideFromBackend: async () => {
+  if (get().guestMode) { set({ view: 'questions' }); return; }
     if (get().busy) return; // avoid overlap
     set({ busy: true, error: null });
     try {
