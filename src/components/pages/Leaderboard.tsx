@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import api from "@/lib/api";
+import RegistrationPrompt from "@/components/RegistrationPrompt";
 
 type LBItem = { rank: number; team_name: string; points: number };
 type LBRes = { status: string; message: string; data: { team_ranking: LBItem[]; user_team?: LBItem } };
@@ -44,6 +45,8 @@ export default function LeaderboardPage() {
           <h1 className="font-qurova ch-gradient-text ch-h1">cryptic hunt</h1>
           <p className="font-area ch-text" style={{ fontSize: 18 }}>Leaderboard</p>
         </header>
+
+        <RegistrationPrompt view="leaderboard" className="mb-8" align="center" />
 
         {loading && <p className="font-area ch-subtext">Loading…</p>}
         {err && <p className="text-red-400 font-area">{err}</p>}
@@ -100,4 +103,3 @@ function Row({ item, highlight }: { item: LBItem; highlight?: boolean }) {
     </div>
   );
 }
-

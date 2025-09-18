@@ -1,0 +1,30 @@
+{
+    "question": {
+        "name": "binaryCount",
+        "phase": "1",
+        "difficulty": "1",
+        "authors": ["Abhirup Das"],
+        "parts": [
+            {
+                "content": [
+                    {
+                        "type": "TEXT",
+                        "data": "Amidst the tapestry of existence, numbers emerge as ethereal guides, revealing the cryptic harmony woven into the threads of life's grand design."
+                    },
+                    {
+                        "type": "FILE_LAPTOP",
+                        "data": ""
+                    }
+
+                ],
+
+                "answertype": "STRING",
+                "answer": "2727",
+                "hint": {
+                    "text": "There are 10 types of people in the world",
+                    "cost": "30"
+                }
+            }
+        ]
+    }
+}

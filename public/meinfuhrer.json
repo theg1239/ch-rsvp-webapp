@@ -1,0 +1,30 @@
+{
+    "question": {
+        "name": "meinFuhrer",
+        "phase": "",
+        "difficulty": "1",
+        "authors": ["Naga Tanmay"],
+        "parts": [
+            {
+                "content": [
+                    {
+                        "type": "TEXT",
+                        "data": "Unravel the secrets of forbidden knowledge hidden in the deepest depths. Crack the unbreakable codes and save the world from the clutches of the evil puppet-master lurking in the shadows with the help of an unknown HERO. Who is this person? Can they help you solve the mystery code?"
+                    },
+                    {
+                        "type": "LINK",
+                        "data": "https://i.imgur.com/yQ9JVsf.jpeg"
+                    }
+
+                ],
+
+                "answertype": "STRING",
+                "answer": "hello world",
+                "hint": {
+                    "text": "He is considered one of World War 2's greatest War Heroes",
+                    "cost": "50"
+                }
+            }
+        ]
+    }
+}

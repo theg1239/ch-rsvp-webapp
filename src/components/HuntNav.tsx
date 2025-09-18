@@ -17,10 +17,10 @@ const baseItems: Item[] = [
 ];
 
 export default function HuntNav() {
-  const { view, setView, decideFromBackend, guestMode } = useAppStore();
+  const { view, setView, decideFromBackend, guestMode, hideNav } = useAppStore();
+  // Always call hooks (useMemo) regardless of hideNav to keep hook order stable.
   const items = useMemo(() => {
     if (!guestMode) return baseItems;
-    // Guest mode: only minimal informational pages
     return baseItems.filter(it => ["about", "faq"].includes(it.view));
   }, [guestMode]);
   const go = (v: Item["view"]) => { if (v === 'questions') { void decideFromBackend(); } else { setView(v); } };
@@ -29,6 +29,8 @@ export default function HuntNav() {
     : view === v;
   const left = useMemo(() => items.slice(0, Math.ceil(items.length / 2)), [items]);
   const right = useMemo(() => items.slice(Math.ceil(items.length / 2)), [items]);
+
+  if (hideNav) return null;
 
   return (
     <nav className="fixed nav-safe-offset left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4" aria-label="Hunt">
