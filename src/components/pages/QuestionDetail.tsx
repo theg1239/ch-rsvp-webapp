@@ -192,11 +192,27 @@ function PartContent({ part }: { part: { id: string; content: Array<string | { t
           if (typeof c === 'string') { return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{c}</p>; }
           const t = normType((c as { type?: string }).type);
           const data: string | undefined = (c as any).data ?? (c as any).text ?? (c as any).url;
-          if (data && (t.includes('image') || isImageUrl(data))) { return <img key={idx} src={data} alt="content" className="ch-img" />; }
-          if (data && (t.includes('link') || t.includes('url'))) { return <LinkOrImage key={idx} url={data} />; }
-          if (data && (t === '' || t.includes('text') || t === 'string')) { return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{data}</p>; }
-          if (data) { return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{data}</p>; }
-          return null;
+          if (!data) return null;
+          const lower = data.toLowerCase();
+          const isPdf = /\.pdf($|\?)/i.test(lower) || t.includes('file');
+          if (isPdf) {
+            return (
+              <div key={idx} className="flex items-center justify-between gap-3 rounded-lg px-4 py-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <img src="/images/QuestionsPage/file.svg" alt="file" className="w-6 h-6 opacity-80" />
+                  <div className="min-w-0">
+                    <p className="font-area ch-text text-sm truncate">{data.split('/').pop()}</p>
+                    <p className="font-area ch-subtext text-xs">PDF Attachment</p>
+                  </div>
+                </div>
+                <a href={data} download target="_blank" rel="noopener noreferrer" className="font-qurova text-xs px-3 py-2 rounded-lg" style={{ background:'#F5753B', color:'#fff' }}>Download</a>
+              </div>
+            );
+          }
+          if (t.includes('image') || isImageUrl(data)) { return <img key={idx} src={data} alt="content" className="ch-img" />; }
+          if (t.includes('link') || t.includes('url')) { return <LinkOrImage key={idx} url={data} />; }
+          if (t === '' || t.includes('text') || t === 'string') { return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{data}</p>; }
+          return <p key={idx} className="font-area ch-text whitespace-pre-wrap">{data}</p>;
         })}
       </div>
     </div>
