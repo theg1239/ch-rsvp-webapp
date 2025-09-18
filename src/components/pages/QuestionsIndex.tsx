@@ -81,7 +81,7 @@ export default function QuestionsIndex() {
           </div>
         )}
 
-  <div className="scroll-area-y mt-4 pb-40">
+  <div className="questions-scroll mt-4 pr-1">
           {questions.length > 0 && (
             <ul className="grid gap-3">
               {questions.map((q) => (
@@ -111,8 +111,8 @@ export default function QuestionsIndex() {
               </ul>
             </div>
           )}
-          {/* Spacer so bottom nav does not cover last item */}
-          <div aria-hidden className="h-32" />
+          {/* Small natural spacer for visual breathing room below list */}
+          <div aria-hidden className="h-6" />
         </div>
       </div>
       {questionId && (
