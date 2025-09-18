@@ -1,10 +1,15 @@
 "use client";
-import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import api from "../../lib/api";
-import type { MainGeneric } from "../../lib/types";
-import { useAuth } from "../../context/AuthContext";
+import api from "@/lib/api";
+import type { MainGeneric } from "@/lib/types";
+import { useAuth } from "@/context/AuthContext";
+import PhaseHeader from "@/components/PhaseHeader";
+import PhaseTimer from "@/components/PhaseTimer";
+import dynamic from "next/dynamic";
+import { useAppStore } from "@/store/appStore";
+
+const QuestionDetail = dynamic(() => import("@/components/pages/QuestionDetail"), { ssr: false });
 
 export default function QuestionsIndex() {
   const { initialized, user } = useAuth();
@@ -14,6 +19,8 @@ export default function QuestionsIndex() {
   const [note, setNote] = useState<string | null>(null);
   const [solved, setSolved] = useState<Array<{ id: string; name: string; difficulty?: { level?: string } }>>([]);
   const [openId, setOpenId] = useState("");
+  const [phaseInfo, setPhaseInfo] = useState<{ phase?: number; next?: string } | null>(null);
+  const { questionId, openQuestion, closeQuestion } = useAppStore();
 
   useEffect(() => {
     let mounted = true;
@@ -23,12 +30,14 @@ export default function QuestionsIndex() {
       try {
         const res = await api.get<MainGeneric>("/api/main");
         if (!mounted) return;
-        if (res.message === "PHASE_ACTIVE" && (res.data as MainGeneric["data"] & { questions?: Array<{ id: string; name: string; difficulty?: { level?: string } }>; solved_questions?: Array<{ id: string; name: string; difficulty?: { level?: string } }> }).questions) {
-          const data = res.data as MainGeneric["data"] & { questions?: Array<{ id: string; name: string; difficulty?: { level?: string } }>; solved_questions?: Array<{ id: string; name: string; difficulty?: { level?: string } }> } || {};
+        if (res.message === "PHASE_ACTIVE" && (res.data as any).questions) {
+          const data = (res.data as any) || {};
           setQuestions(data.questions || []);
           setSolved(data.solved_questions || []);
+          setPhaseInfo({ phase: data.active_phase, next: data.next_phase_time });
         } else {
           setNote(`Status: ${res.message}. You can still open a question directly if you know its id.`);
+          const d: any = res.data || {}; setPhaseInfo({ phase: d.active_phase, next: d.next_phase_time });
         }
       } catch (e) {
         if (e instanceof Error) setErr(e.message);
@@ -46,6 +55,12 @@ export default function QuestionsIndex() {
           <Image src="/images/QuestionsPage/refresh.svg" alt="refresh" width={20} height={20} className="w-5 h-5 opacity-80" onClick={() => location.reload()} />
           <h1 className="font-qurova ch-gradient-text ch-h2">Questions</h1>
         </div>
+        {phaseInfo && (
+          <div className="grid gap-3 mb-4">
+            <PhaseHeader phase={phaseInfo.phase ?? '—'} title="Phase Progress" subtitle={phaseInfo.next ? `Next: ${new Date(phaseInfo.next).toLocaleString()}` : undefined} />
+            {phaseInfo.next && <PhaseTimer until={phaseInfo.next} />}
+          </div>
+        )}
         {loading && <p className="font-area ch-subtext">Loading…</p>}
         {err && <p className="text-red-400 font-area">{err}</p>}
         {note && <p className="font-area ch-subtext">{note}</p>}
@@ -53,12 +68,11 @@ export default function QuestionsIndex() {
           <div className="mt-4 grid gap-2">
             <div className="flex gap-2 items-center">
               <input value={openId} onChange={(e) => setOpenId(e.target.value)} className="h-11 flex-1 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area" placeholder="Enter question ID" />
-              <Link prefetch={false} href={openId ? `/questions/${openId}` : '#'} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</Link>
+              <button onClick={()=> openId && openQuestion(openId)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
             </div>
           </div>
         )}
 
-        {/* Scroll area for lists so only this section scrolls */}
         <div className="scroll-area-y mt-4">
           {questions.length > 0 && (
             <ul className="grid gap-3">
@@ -68,7 +82,7 @@ export default function QuestionsIndex() {
                     <p className="ch-text font-qurova text-lg">{q.name}</p>
                     <p className="font-area ch-subtext text-sm">{q.difficulty?.level || ''}</p>
                   </div>
-                  <Link href={`/questions/${q.id}`} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</Link>
+                  <button onClick={()=> openQuestion(q.id)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
                 </li>
               ))}
             </ul>
@@ -90,8 +104,8 @@ export default function QuestionsIndex() {
             </div>
           )}
         </div>
-
       </div>
+      {questionId && <QuestionDetail id={questionId} onClose={closeQuestion} />}
     </div>
   );
 }

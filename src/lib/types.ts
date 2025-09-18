@@ -29,3 +29,19 @@ export type GetQuestionRes = ApiOk<{
 }>;
 
 export type SubmitResponseRes = ApiOk<{ response: string | Record<string, unknown>; points: number }>;
+
+// Onboarding (match cryptic-hunt-frontend/interfaces/onboarding_controller.ts)
+export enum Gender {
+  MALE = "MALE",
+  FEMALE = "FEMALE",
+  OTHER = "OTHER",
+}
+
+export type PostUserDetailsReq = {
+  phone: string;
+  gender: Gender;
+};
+
+export type PostUserDetailsRes =
+  | { status: "failed"; message: "Invalid Request Body" | "Phone number is required" | "Gender is required" | "Invalid gender value" }
+  | { status: "success"; message: "User details updated successfully"; data: { user_id: string; phone: string; gender: Gender } };

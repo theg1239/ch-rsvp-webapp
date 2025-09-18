@@ -90,11 +90,14 @@ body {
 .font-area { font-family: 'AreaVariable-Thin', 'AreaVariable', var(--font-geist-sans), ui-sans-serif, system-ui; font-weight: 300; }
 .font-geist { font-family: var(--font-geist-sans), ui-sans-serif, system-ui; }
 
-.nav-icon { 
-  filter: grayscale(1) brightness(1.1) opacity(0.95);
+.nav-icon {
+  /* Normalize all inactive icons to the same subtle grey */
+  filter: grayscale(1) brightness(1) contrast(100%);
+  opacity: 0.78;
   transition: filter 120ms ease, opacity 120ms ease;
 }
 .nav-icon.active {
+  /* Match mobile accent when active */
   filter: invert(57%) sepia(65%) saturate(1038%) hue-rotate(341deg) brightness(101%) contrast(96%);
   opacity: 1;
 }

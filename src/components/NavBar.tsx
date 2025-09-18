@@ -1,27 +1,35 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-type NavItem = { href: string; label: string; icon: string; external?: boolean };
+type NavItem = { href: string; label: string; icon: string };
+// Mirror mobile navbar order and items
 const items: NavItem[] = [
-  { href: "/", label: "Home", icon: "/images/NavBar/home.svg" },
-  { href: "/profile", label: "Profile", icon: "/images/NavBar/profilenew.svg" },
+  { href: "/timeline", label: "Timeline", icon: "/images/NavBar/calendar-2.svg" },
+  // { href: "/", label: "Home", icon: "/images/NavBar/home.svg" },
   { href: "/leaderboard", label: "Leaderboard", icon: "/images/NavBar/cup.svg" },
-  { href: "/questions", label: "Questions", icon: "/images/NavBar/note.svg" },
-  { href: "https://gravitas.vit.ac.in/events/3df08aa2-22c9-42ff-8640-de501218780f", label: "Register", icon: "/images/NavBar/calendar-2.svg", external: true },
+  { href: "/faq", label: "FAQ", icon: "/images/NavBar/FAQ.svg" },
+  { href: "/announcements", label: "Announcements", icon: "/images/NavBar/archive.svg" },
+  { href: "/rules", label: "Rules", icon: "/images/NavBar/briefcase.svg" },
+  { href: "/resources", label: "Resources", icon: "/images/NavBar/resources.svg" },
 ];
 
 import { useAuth } from "../context/AuthContext";
+import { useAppStore } from "../store/appStore";
 
 export default function NavBar() {
   const pathname = usePathname();
   const path = pathname || "";
+  const router = useRouter();
   const { user, initialized } = useAuth();
+  const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
+  const { view, setView, decideFromBackend, hideNav } = useAppStore();
 
   // Auto-hide on desktop when viewing leaderboard (hooks must run unconditionally)
   const [autoHidden, setAutoHidden] = useState(false);
+  const [scrolledNav, setScrolledNav] = useState(false);
   useEffect(() => {
     const isLeaderboard = path === "/leaderboard";
     const isDesktop = typeof window !== "undefined" && window.matchMedia('(min-width: 1024px)').matches;
@@ -39,48 +47,127 @@ export default function NavBar() {
   }, [path]);
 
   // Hide on auth routes regardless of auth state (after hooks)
-  if (path.startsWith("/signin") || path.startsWith("/signup")) return null;
+  const hideForAuthPath = path.startsWith("/signin") || path.startsWith("/signup") || path.startsWith("/onboarding") || path.startsWith("/checkin") || path.startsWith("/hunt");
+  const hideForSPA = SPA && (view === 'signin' || view === 'signup' || view === 'onboarding' || view === 'checkin');
+  if (hideForAuthPath || hideForSPA || hideNav) return null;
   if (!initialized || !user) return null;
+
+  const scrollToEdge = (toEnd: boolean) => {
+    try {
+      const scroller = document.getElementById('ch-nav-scroller');
+      if (!scroller) return;
+      const behavior: ScrollBehavior = 'smooth';
+      scroller.scrollTo({ left: toEnd ? scroller.scrollWidth : 0, behavior });
+    } catch {}
+  };
   return (
     <nav className={`fixed nav-safe-offset left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4 transition-opacity duration-300 ${autoHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} aria-label="Primary">
-      <div className="rounded-2xl py-2 ch-card ch-glass relative">
-        {/* Horizontal scroll container on mobile; evenly spaced on larger screens */}
-  <div className="flex items-center gap-2 px-3 overflow-x-auto scroll-x no-scrollbar touch-pan-x scroll-smooth sm:overflow-visible sm:no-scrollbar sm:justify-between sm:gap-3" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {items.map((it) => {
-            // Highlight only real route matches
-            const active = (!it.external && pathname === it.href);
-            const isRegister = it.label.toLowerCase() === 'register' || (it.external && it.href.includes('gravitas'));
-            const showActiveStyle = active || isRegister;
-            const content = (
-              <>
-                <Image src={it.icon} alt={it.label} width={22} height={22} className={`w-[22px] h-[22px] nav-icon ${showActiveStyle ? 'active' : ''}`} />
-                <span className={`text-[11px] mt-0.5 ${isRegister ? 'px-2 py-[2px] rounded-md' : ''}`}
-                      style={{ color: showActiveStyle ? '#F5753B' : '#ccc', background: isRegister ? 'rgba(245,117,59,0.12)' : 'transparent' }}>
-                  {it.label}
-                </span>
-                {active && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 ch-gradient" />}
-              </>
+      <div className="relative rounded-2xl py-2 ch-card ch-glass ring-1 ring-[rgba(255,255,255,0.06)] shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+        {/* Scrolling strip */}
+        <div id="ch-nav-scroller" className="flex items-center gap-2 px-3 overflow-x-auto scroll-x no-scrollbar touch-pan-x scroll-smooth sm:overflow-visible sm:no-scrollbar sm:justify-between sm:gap-3" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {/* Left cluster */}
+          {items.slice(0, 3).map((it) => {
+            const active = SPA ? matchView(view, it.href) : (it.href === '/' ? pathname === '/' : pathname === it.href);
+            if (SPA) {
+              return (
+                <button key={it.href} type="button" onClick={() => goTo(it.href, setView, decideFromBackend)}
+                        className="relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1">
+                  <Image src={it.icon} alt={it.label} width={24} height={24} className={`w-[24px] h-[24px] nav-icon ${active ? 'active' : ''}`} />
+                  <span className="text-[11px] mt-0.5 font-area" style={{ color: active ? '#F5753B' : '#ccc' }}>{it.label}</span>
+                  {active && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 ch-gradient rounded-full" />}
+                </button>
+              );
+            }
+            return (
+              <Link key={it.href} href={it.href} className="relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1">
+                <Image src={it.icon} alt={it.label} width={24} height={24} className={`w-[24px] h-[24px] nav-icon ${active ? 'active' : ''}`} />
+                <span className="text-[11px] mt-0.5 font-area" style={{ color: active ? '#F5753B' : '#ccc' }}>{it.label}</span>
+                {active && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 ch-gradient rounded-full" />}
+              </Link>
             );
+          })}
 
-            return it.external ? (
-              <a key={it.href} href={it.href} target="_blank" rel="noopener noreferrer"
-                 className={`relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1 hover:opacity-90 ${isRegister ? 'rounded-xl ring-1 ring-[rgba(245,117,59,0.35)]' : ''}`}>
-                {content}
-              </a>
-            ) : (
-              <Link key={it.href} href={it.href} className={`relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1 ${isRegister ? 'rounded-xl ring-1 ring-[rgba(245,117,59,0.35)]' : ''}`}>
-                {content}
+          {/* Spacer around center owl (gap on both sides) */}
+          <div aria-hidden className="shrink-0" style={{ width: 128 }} />
+
+          {/* Right cluster */}
+          {items.slice(3).map((it) => {
+            const active = SPA ? matchView(view, it.href) : (it.href === '/' ? pathname === '/' : pathname === it.href);
+            if (SPA) {
+              return (
+                <button key={it.href} type="button" onClick={() => goTo(it.href, setView, decideFromBackend)}
+                        className="relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1">
+                  <Image src={it.icon} alt={it.label} width={24} height={24} className={`w-[24px] h-[24px] nav-icon ${active ? 'active' : ''}`} />
+                  <span className="text-[11px] mt-0.5 font-area" style={{ color: active ? '#F5753B' : '#ccc' }}>{it.label}</span>
+                  {active && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 ch-gradient rounded-full" />}
+                </button>
+              );
+            }
+            return (
+              <Link key={it.href} href={it.href} className="relative shrink-0 sm:shrink flex flex-col items-center gap-1 px-3 py-1">
+                <Image src={it.icon} alt={it.label} width={24} height={24} className={`w-[24px] h-[24px] nav-icon ${active ? 'active' : ''}`} />
+                <span className="text-[11px] mt-0.5 font-area" style={{ color: active ? '#F5753B' : '#ccc' }}>{it.label}</span>
+                {active && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 ch-gradient rounded-full" />}
               </Link>
             );
           })}
         </div>
-
-        {/* Right fade and arrow hint on small screens */}
-        <div className="pointer-events-none absolute inset-y-0 right-1 flex items-center sm:hidden">
+        {/* Toggle scroll button */}
+        <button aria-label="Toggle" onClick={() => { const toEnd = !scrolledNav; scrollToEdge(toEnd); setScrolledNav(toEnd); setAutoHidden(false); }}
+                className="absolute inset-y-0 right-1 flex items-center sm:hidden px-1 rounded-l-xl bg-transparent">
           <div className="h-8 w-6 mr-1 rounded-l-xl" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(36,31,26,0.75) 80%)' }} />
-          <Image src="/images/QuestionsPage/left-arrow.svg" alt="scroll" width={16} height={16} className="rotate-180 w-4 h-4 opacity-75 animate-pulse" />
+          <Image src="/images/QuestionsPage/left-arrow.svg" alt="scroll" width={16} height={16} className={`w-4 h-4 opacity-75 ${scrolledNav ? '' : 'rotate-180'}`} />
+        </button>
+
+        {/* Center circle owl */}
+        <div className="pointer-events-none">
+          <button type="button" aria-label="Owl"
+                  className="pointer-events-auto absolute left-1/2 -translate-x-1/2 -top-7 w-[76px] h-[76px] rounded-full flex items-center justify-center"
+                  onClick={() => {
+                    if (SPA) { setView('questions'); } else { router.push('/questions'); }
+                  }}>
+            <Image src="/images/NavBar/owl with circle.svg" alt="owl" width={76} height={76} className="w-[76px] h-[76px]" />
+          </button>
         </div>
       </div>
     </nav>
   );
+}
+
+// Helpers for SPA mode
+function matchView(view: ReturnType<typeof useAppStore.getState>["view"], href: string): boolean {
+  switch (href) {
+    case '/': return view === 'questions' || view === 'team' || view === 'profile' || view === 'checkin';
+    case '/leaderboard': return view === 'leaderboard';
+    case '/questions': return view === 'questions';
+    case '/profile': return view === 'profile';
+    // Non-SPA static routes; treat as not active under SPA view control
+    case '/timeline':
+    case '/faq':
+    case '/announcements':
+    case '/rules':
+    case '/resources':
+      return false;
+    default: return false;
+  }
+}
+
+function goTo(href: string, setView: (v: any) => void, decideFromBackend: () => Promise<void>) {
+  switch (href) {
+    case '/':
+      void decideFromBackend();
+      break;
+    case '/leaderboard': setView('leaderboard'); break;
+    case '/questions': setView('questions'); break;
+    case '/profile': setView('profile'); break;
+    // Fall back to hard navigation for static pages in SPA mode
+    case '/timeline':
+    case '/faq':
+    case '/announcements':
+    case '/rules':
+    case '/resources':
+      if (typeof window !== 'undefined') window.location.href = href;
+      break;
+    default: break;
+  }
 }

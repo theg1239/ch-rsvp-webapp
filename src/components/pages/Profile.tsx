@@ -2,13 +2,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import api from "../../lib/api";
-import type { ApiOk, ProfileData } from "../../lib/types";
-import { useAuth } from "../../context/AuthContext";
+import api from "@/lib/api";
+import type { ApiOk, ProfileData } from "@/lib/types";
+import { useAuth } from "@/context/AuthContext";
+import { useAppStore } from "@/store/appStore";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { initialized, user } = useAuth();
+  const { setView } = useAppStore();
+  const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [notInTeam, setNotInTeam] = useState(false);
@@ -17,26 +20,20 @@ export default function ProfilePage() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      if (initialized && !user) { router.replace('/signin'); return; }
+      if (!initialized) return;
+      if (!user) { if (SPA) setView('signin'); else router.replace('/signin'); return; }
       try {
         const res = await api.get<ApiOk<ProfileData>>("/api/profile/");
         if (!mounted) return;
         setData(res.data);
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Failed to fetch profile";
-        if (msg.includes('User is not part of any team') || msg.includes('400')) {
-          setNotInTeam(true);
-        } else {
-          setErr(msg);
-        }
-      } finally {
-        setLoading(false);
-      }
+        if (msg.includes('User is not part of any team') || msg.includes('400')) { setNotInTeam(true); }
+        else { setErr(msg); }
+      } finally { setLoading(false); }
     })();
-    return () => {
-      mounted = false;
-    };
-  }, [initialized, user, router]);
+    return () => { mounted = false; };
+  }, [initialized, user, router, setView, SPA]);
 
   return (
     <div className="min-h-dvh ch-bg relative">
@@ -50,7 +47,7 @@ export default function ProfilePage() {
         {notInTeam && (
           <div className="grid gap-3 items-center text-center">
             <p className="font-area ch-subtext">You are not part of a team yet.</p>
-            <Link href="/team" className="inline-block px-5 py-3 rounded-xl font-qurova ch-btn">Create / Join Team</Link>
+            <Link href="/hunt/team" className="inline-block px-5 py-3 rounded-xl font-qurova ch-btn">Create / Join Team</Link>
           </div>
         )}
         {data && !notInTeam && (
@@ -85,3 +82,4 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

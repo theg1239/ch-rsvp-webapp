@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import api from "../../lib/api";
+import api from "@/lib/api";
 
 type LBItem = { rank: number; team_name: string; points: number };
 type LBRes = { status: string; message: string; data: { team_ranking: LBItem[]; user_team?: LBItem } };
@@ -34,7 +34,6 @@ export default function LeaderboardPage() {
   }, []);
 
   const top3 = useMemo(() => items.slice(0, 3), [items]);
-  // Show all remaining items and let the page scroll
   const list = useMemo(() => items.slice(3), [items]);
 
   return (
@@ -51,21 +50,18 @@ export default function LeaderboardPage() {
 
         {!loading && !err && (
           <>
-            {/* Podium: left-aligned + horizontally scrollable on mobile, centered on md+ */}
             <div className="flex items-end gap-6 mb-10 scroll-x snap-x md:snap-none md:justify-center -mx-4 px-4">
               {top3[1] ? <Podium place={2} item={top3[1]} /> : <div className="w-40 shrink-0" />}
               {top3[0] ? <Podium place={1} item={top3[0]} /> : <div className="w-40 shrink-0" />}
               {top3[2] ? <Podium place={3} item={top3[2]} /> : <div className="w-40 shrink-0" />}
             </div>
 
-            {/* List 4..10 */}
             <div className="grid gap-3">
               {list.map((it) => (
                 <Row key={it.rank} item={it} />
               ))}
             </div>
 
-            {/* Your team */}
             <div className="mt-8 mb-8">
               <Row item={userTeam || { rank: 0, team_name: "GET A TEAM", points: 0 }} highlight />
             </div>
@@ -104,3 +100,4 @@ function Row({ item, highlight }: { item: LBItem; highlight?: boolean }) {
     </div>
   );
 }
+

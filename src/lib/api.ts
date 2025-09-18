@@ -10,25 +10,44 @@ async function request<T>(path: string, options: RequestInit & { auth?: boolean 
   headers.set("Content-Type", "application/json");
 
   if (options.auth) {
-    const token = await getIdToken();
+    let token = await getIdToken();
+    if (!token) {
+      const start = Date.now();
+      const maxWait = 1200; // ms
+      while (!token && Date.now() - start < maxWait) {
+        await new Promise((r) => setTimeout(r, 150));
+        token = await getIdToken();
+      }
+    }
     if (token) headers.set("Authorization", `Bearer ${token}`);
   }
 
   let res = await fetch(url, { ...options, headers });
   let text = await res.text();
-  let data = text ? JSON.parse(text) : {};
+  let data: any;
+  try { data = text ? JSON.parse(text) : {}; }
+  catch { data = { message: text || "" }; }
   if (!res.ok) {
     const message = (data?.message || res.statusText || "").toString();
     const msgLow = message.toLowerCase();
     // Retry once with a fresh token if auth header was missing/expired
-    if (options.auth && (res.status === 401 || msgLow.includes("authorization") || msgLow.includes("unauthorized"))) {
+    const looksAuthError =
+      msgLow.includes("authorization") ||
+      msgLow.includes("unauthorized") ||
+      msgLow.includes("unauth") ||
+      msgLow.includes("forbidden") ||
+      msgLow.includes("token") ||
+      msgLow.includes("expired") ||
+      msgLow.includes("jwt");
+    if (options.auth && (res.status === 401 || res.status === 403 || looksAuthError)) {
       const retryHeaders = new Headers(options.headers || {});
       retryHeaders.set("Content-Type", "application/json");
       const fresh = await getIdToken(true);
       if (fresh) retryHeaders.set("Authorization", `Bearer ${fresh}`);
       res = await fetch(url, { ...options, headers: retryHeaders });
       text = await res.text();
-      data = text ? JSON.parse(text) : {};
+      try { data = text ? JSON.parse(text) : {}; }
+      catch { data = { message: text || "" }; }
       if (!res.ok) {
         const message2 = data?.message || res.statusText;
         throw new Error(message2);
