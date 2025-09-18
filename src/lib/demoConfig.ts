@@ -57,6 +57,71 @@ export const demoQuestions: DemoQuestion[] = [
     answers: [], // empty => any non-empty answer is accepted
     points: 5,
   },
+  // Imported JSON questions (simplified mapping)
+  {
+    id: 'binarycount',
+    name: 'binaryCount',
+    difficulty: { level: '1' },
+    parts: [
+      {
+        id: 'p-binarycount-1',
+        content: [
+          'Amidst the tapestry of existence, numbers emerge as ethereal guides, revealing the cryptic harmony woven into the threads of life\'s grand design.',
+          { type: 'FILE', data: '/Numbers.pdf' },
+        ],
+      },
+    ],
+    answers: ['2727'],
+    points: 20,
+  },
+  {
+    id: 'giffy',
+    name: 'giffy',
+    difficulty: { level: '2' },
+    parts: [
+      {
+        id: 'p-giffy-1',
+        content: [
+          'Can you decode a hidden message and find a secret flag in this GIF that might be something more than just a GIF?',
+          { type: 'IMAGE', data: '/@11zon_created-GIF.gif' },
+        ],
+      },
+    ],
+    answers: ['GIFSAREFUN'],
+    points: 25,
+  },
+  {
+    id: 'meinfuhrer',
+    name: 'meinFuhrer',
+    difficulty: { level: '1' },
+    parts: [
+      {
+        id: 'p-meinfuhrer-1',
+        content: [
+          'Unravel the secrets of forbidden knowledge hidden in the deepest depths. Crack the unbreakable codes and save the world from the clutches of the evil puppet-master lurking in the shadows with the help of an unknown HERO. Who is this person? Can they help you solve the mystery code?',
+          { type: 'LINK', data: 'https://i.imgur.com/yQ9JVsf.jpeg' },
+        ],
+      },
+    ],
+    answers: ['HELLO WORLD','HELLOWORLD'],
+    points: 15,
+  },
+  {
+    id: 'trinitytest',
+    name: 'trinityTest',
+    difficulty: { level: '1' },
+    parts: [
+      {
+        id: 'p-trinitytest-1',
+        content: [
+          'In the world of secrets and codes, deciphering a cipher is like defusing a bomb. One wrong move, and all truths explode into the open. Three magic words lead you to the answer you seek.',
+          { type: 'LINK', data: 'https://i.imgur.com/BHIZLHi.png' },
+        ],
+      },
+    ],
+    answers: ['UNSHAVEN.ASSUMES.SKATING','UNSHAVEN ASSUMES SKATING'],
+    points: 30,
+  },
 ];
 
 export const demoAnnouncements: DemoAnnouncement[] = [
@@ -74,12 +139,13 @@ export const demoLeaderboard: DemoLeaderboardItem[] = [
 export function evaluateDemoAnswer(questionId: string, raw: string): { correct: boolean; points: number } {
   const q = demoQuestions.find(q => q.id === questionId);
   if (!q) return { correct: false, points: 0 };
-  const normalized = raw.trim().toUpperCase();
+  const normalize = (s: string) => s.trim().toUpperCase().replace(/\s+/g,'').replace(/\u200B/g,'');
+  const normalized = normalize(raw);
   if (!normalized) return { correct: false, points: 0 };
   if (!q.answers || q.answers.length === 0) {
-    // Any non-empty answer accepted
     return { correct: true, points: q.points ?? 0 };
   }
-  const correct = q.answers.includes(normalized);
+  const variants = new Set(q.answers.map(a => normalize(a)));
+  const correct = variants.has(normalized);
   return { correct, points: correct ? (q.points ?? 0) : 0 };
 }

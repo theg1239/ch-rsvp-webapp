@@ -1,0 +1,30 @@
+{
+    "question": {
+        "name": "giffy",
+        "phase": "",
+        "difficulty": "2",
+        "authors": ["Shambhavi Paygude"],
+        "parts": [
+            {
+                "content": [
+                    {
+                        "type": "TEXT",
+                        "data": "Can you decode a hidden message and find a secret flag in this GIF that might be something more than just a GIF?"
+                    },
+                    {
+                        "type": "IMAGE",
+                        "data": ""
+                    }
+
+                ],
+
+                "answertype": "STRING",
+                "answer": "gifsAreFun",
+                "hint": {
+                    "text": "",
+                    "cost": "0"
+                }
+            }
+        ]
+    }
+}

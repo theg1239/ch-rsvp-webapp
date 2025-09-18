@@ -1,0 +1,30 @@
+{
+    "question": {
+        "name": "trinityTest",
+        "phase": "",
+        "difficulty": "1",
+        "authors": ["Abhirup Das"],
+        "parts": [
+            {
+                "content": [
+                    {
+                        "type": "TEXT",
+                        "data": "In the world of secrets and codes, deciphering a cipher is like defusing a bomb. One wrong move, and all truths explode into the open. Three magic words lead you to the answer you seek."
+                    },
+                    {
+                        "type": "LINK",
+                        "data": "https://i.imgur.com/BHIZLHi.png"
+                    }
+
+                ],
+
+                "answertype": "STRING",
+                "answer": "unshaven.assumes.skating",
+                "hint": {
+                    "text": "what 3 words, '.' separated, remove ///",
+                    "cost": "60"
+                }
+            }
+        ]
+    }
+}
