@@ -14,9 +14,13 @@ export default function AnnouncementsPage() {
     (async () => {
       setLoading(true); setErr(null);
       try {
-        const res = await api.get<{ status: string; data: Announcement[] }>("/api/app/announcements/");
+        const res = await api.get<{ status: string; data: unknown }>("/api/app/announcements/");
         if (!mounted) return;
-        setList(res.data || []);
+        const raw = (res as any)?.data;
+        const arr: Announcement[] = Array.isArray(raw)
+          ? raw.filter((x) => x && typeof x === 'object')
+          : [];
+        setList(arr);
       } catch (e) {
         setErr(e instanceof Error ? e.message : "Failed to load announcements");
       } finally { setLoading(false); }

@@ -78,3 +78,23 @@ Copy the following SVGs from the mobile repo into `public/cryptic-assets/`:
 - Optionally: `six-owls.svg`, `JoinPage/AllOwls.svg`, `JoinPage/scanning.svg` if you want those specific illustrations/buttons
 
 After copying, the auth and team screens will show the same background and corner logo.
+
+### Guest Mode (no backend / no auth)
+
+If you want to run the app without Firebase auth or the backend, enable Guest Mode:
+
+- In `.env.local`, set `NEXT_PUBLIC_GUEST_MODE=1` (or `GUEST_MODE=1`).
+- The app will:
+	- Skip Firebase sign-in and treat you as a synthetic “Guest” user.
+	- Short-circuit backend calls by serving mock data for key endpoints (`/api/main`, `/api/profile/`, `/api/questions/:id`, `/api/response/`, `/api/leaderboard/team`, `/api/team/user/qr`).
+	- Auto-place you into a ready “Guest Team” to avoid onboarding and team creation flows.
+	- Route you straight to `/hunt` and land on the About page (informational mode).
+	- Filter the navigation to only show: About, FAQ, Rules, Resources, Announcements.
+	- Hide gameplay / team management UI (questions list can still be accessed internally if you navigate, but nav excludes it).
+	- Hide QR / NFC scanning buttons in question detail.
+	- Simulate phase timing: shows `PHASE_NOT_STARTED` until 26 Sept 2025 (UTC), then automatically flips to `PHASE_ACTIVE`.
+
+Notes:
+- Team create/join/leave actions are disabled in Guest Mode (no-ops).
+- FCM messaging is ignored in Guest Mode.
+- To return to normal behavior, unset the env and restart the dev server.

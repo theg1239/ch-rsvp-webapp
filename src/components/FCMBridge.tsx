@@ -12,7 +12,7 @@ export default function FCMBridge() {
   const router = useRouter();
   const pathname = usePathname() || '';
   const { user, initialized } = useAuth();
-  const { decideFromBackend, setView } = useAppStore() as any;
+  const { decideFromBackend, setView, guestMode } = useAppStore() as any;
   const phase = usePhase();
   const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
 
@@ -40,6 +40,7 @@ export default function FCMBridge() {
 
   useEffect(() => {
     if (!initialized || !user) return;
+    if (guestMode) return; // Skip FCM-driven backend routing in guest mode
     const refreshRoute = async () => {
       if (SPA && pathname.startsWith('/hunt')) { await decideFromBackend(); return; }
       try {
@@ -81,7 +82,7 @@ export default function FCMBridge() {
     };
 
     // Bridge onMessage (foreground)
-    void setupMessaging(refreshRoute, handleEvent);
+  void setupMessaging(refreshRoute, handleEvent);
 
     // Bridge SW -> page messages (background clicks/background message relay)
     const onSwMessage = (ev: MessageEvent) => {
@@ -93,6 +94,6 @@ export default function FCMBridge() {
     return () => {
       navigator.serviceWorker?.removeEventListener?.('message', onSwMessage as any);
     };
-  }, [initialized, user, SPA, router, pathname, decideFromBackend, phase, setView]);
+  }, [initialized, user, SPA, router, pathname, decideFromBackend, phase, setView, guestMode]);
   return null;
 }

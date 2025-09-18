@@ -14,7 +14,7 @@ type ProfileState = { loading: boolean; data: ProfileData | null; notInTeam: boo
 export default function TeamPage() {
   const router = useRouter();
   const { user, initialized } = useAuth();
-  const { setView, setHideNav } = useAppStore();
+  const { setView, setHideNav, guestMode } = useAppStore();
   const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
   const [state, setState] = useState<ProfileState>({ loading: true, data: null, notInTeam: false, error: null });
   const [qrB64, setQrB64] = useState<string | null>(null);
@@ -23,7 +23,15 @@ export default function TeamPage() {
 
   useEffect(() => {
     if (!initialized) return;
-    if (!user) { if (SPA) setView('signin'); else router.replace("/signin"); return; }
+    if (!user) { if (SPA || guestMode) setView('questions'); else router.replace("/signin"); return; }
+    if (guestMode) {
+      setState({ loading: false, data: {
+        user: { id: 'guest', name: 'Guest', email: 'guest@example.com', team: { id: 'guest-team', name: 'Guest Team', code: 'GUEST', users: [{ name: 'Guest', email: 'guest@example.com' }] } },
+        team_members: ['Guest'], correct_responses_count: 0, team_rank: 0, points: 0,
+      } as any, notInTeam: false, error: null });
+      setQrB64(null);
+      return;
+    }
     let mounted = true;
     (async () => {
       try {
@@ -44,7 +52,7 @@ export default function TeamPage() {
     return () => { mounted = false; };
   }, [initialized, user, router, setView, SPA]);
 
-  useEffect(() => { if (!state.data) return; api.get<ApiOk<string>>("/api/team/user/qr").then((r)=>setQrB64(r.data)).catch(()=>setQrB64(null)); }, [state.data]);
+  useEffect(() => { if (guestMode) return; if (!state.data) return; api.get<ApiOk<string>>("/api/team/user/qr").then((r)=>setQrB64(r.data)).catch(()=>setQrB64(null)); }, [state.data, guestMode]);
 
   const content = useMemo(() => {
     if (state.loading) return <p className="text-sm" style={{ color: MainColors.subText }}>Loading…</p>;
@@ -68,7 +76,7 @@ export default function TeamPage() {
 
 function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
   const router = useRouter();
-  const { setView } = useAppStore();
+  const { setView, guestMode } = useAppStore();
   const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -80,7 +88,10 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
     setErr(null);
     if (!name.trim()) return setErr("Team name is required");
     setBusy("Creating team…");
-    try { await api.post<ApiOk<string>>("/api/user/team/create", { name }); if (SPA) setView('questions'); else router.push("/hunt/questions"); }
+    try {
+      if (guestMode) { setView('questions'); return; }
+      await api.post<ApiOk<string>>("/api/user/team/create", { name }); if (SPA) setView('questions'); else router.push("/hunt/questions");
+    }
     catch (e) { setErr(e instanceof Error ? e.message : "Failed to create team"); }
     finally { setBusy(null); }
   };
@@ -90,7 +101,7 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
   const joinWithCode = async (c: string) => {
     setBusy("Joining team…");
     try {
-      await api.post<ApiOk<string>>("/api/user/team/join", { code: c.toUpperCase() });
+      if (!guestMode) { await api.post<ApiOk<string>>("/api/user/team/join", { code: c.toUpperCase() }); }
       if (SPA) setView('questions'); else router.replace('/hunt/questions');
       onSuccess();
     } catch (e) { setErr(e instanceof Error ? e.message : "Failed to join team"); }
@@ -102,20 +113,20 @@ function NoTeamView({ onSuccess }: { onSuccess: () => void }) {
       <section className="grid gap-3">
         <h2 className="font-qurova ch-gradient-text ch-h2">Create a team</h2>
         <input className="w-full h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area" placeholder="Team name" value={name} onChange={(e) => setName(e.target.value)} />
-        <button onClick={createTeam} className="h-11 rounded-xl font-qurova ch-btn">Create team</button>
+  <button onClick={createTeam} disabled={guestMode} className="h-11 rounded-xl font-qurova ch-btn opacity-[var(--btn-opacity)]" style={{ ['--btn-opacity' as any]: guestMode ? 0.6 : 1 }}>Create team</button>
       </section>
 
       <section className="grid gap-3">
         <h2 className="font-qurova ch-gradient-text ch-h2">Join with code</h2>
         <CodeInputs value={code} onChange={setCode} length={6} />
-        <button onClick={joinTeam} className="h-11 rounded-xl font-qurova ch-btn">Join team</button>
+  <button onClick={joinTeam} disabled={guestMode} className="h-11 rounded-xl font-qurova ch-btn opacity-[var(--btn-opacity)]" style={{ ['--btn-opacity' as any]: guestMode ? 0.6 : 1 }}>Join team</button>
         <div className="flex items-center gap-3 mt-2 opacity-80" style={{ color: MainColors.subText }}>
           <div className="flex-1 h-px" style={{ backgroundColor: MainColors.subText }} />
           <span className="font-area">OR</span>
           <div className="flex-1 h-px" style={{ backgroundColor: MainColors.subText }} />
         </div>
         <div className="w-full flex items-center justify-center">
-          <button className="rounded-full px-8 py-3 bg-white flex items-center gap-3" type="button" onClick={()=>setScanOpen(true)}>
+          <button className="rounded-full px-8 py-3 bg-white flex items-center gap-3" type="button" onClick={()=>setScanOpen(true)} disabled={guestMode}>
             <img src="/images/JoinPage/scanning.svg" alt="scan" className="w-5 h-5" />
             <span className="font-area" style={{ color: '#2C2824' }}>Join using QR</span>
           </button>
@@ -134,11 +145,11 @@ function TeamView({ data, qrB64, onLeft }: { data: ProfileData; qrB64: string | 
   const [leaving, setLeaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const router = useRouter();
-  const { setView } = useAppStore();
+  const { setView, guestMode } = useAppStore();
   const SPA = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SPA === '1';
   const leave = async () => {
     setErr(null); setLeaving(true);
-    try { await api.post<ApiOk<unknown>>("/api/profile/leave_team", {}); if (SPA) setView('profile'); else router.replace('/hunt/profile'); onLeft(); }
+    try { if (!guestMode) { await api.post<ApiOk<unknown>>("/api/profile/leave_team", {}); } if (SPA) setView('profile'); else router.replace('/hunt/profile'); onLeft(); }
     catch (e) { setErr(e instanceof Error ? e.message : "Failed to leave team"); }
     finally { setLeaving(false); }
   };
