@@ -23,6 +23,7 @@ export default function QuestionsIndex() {
   const [phaseInfo, setPhaseInfo] = useState<{ phase?: number; next?: string } | null>(null);
   const { guestMode, questionId, openQuestion, closeQuestion } = useAppStore() as any;
   const listRef = useRef<HTMLDivElement | null>(null);
+  const aboveRef = useRef<HTMLDivElement | null>(null);
   const [listHeight, setListHeight] = useState<number | undefined>(undefined);
 
   const measureListHeight = useCallback(() => {
@@ -49,7 +50,8 @@ export default function QuestionsIndex() {
     const t2 = setTimeout(measureListHeight, 250);
     // Observe layout shifts (e.g., banners/prompt appearing)
     const ro = new ResizeObserver(() => measureListHeight());
-    if (document.body) ro.observe(document.body);
+    if (aboveRef.current) ro.observe(aboveRef.current);
+    else if (document.body) ro.observe(document.body);
     return () => {
       window.removeEventListener('resize', onResize);
       clearTimeout(t1); clearTimeout(t2);
@@ -104,18 +106,20 @@ export default function QuestionsIndex() {
             </div>
           </div>
         )}
-        <RegistrationPrompt view="questions" className="mb-6" />
-        {loading && <p className="font-area ch-subtext">Loading…</p>}
-        {err && <p className="text-red-400 font-area">{err}</p>}
-        {note && <p className="font-area ch-subtext">{note}</p>}
-        {note && (
-          <div className="mt-4 grid gap-2">
-            <div className="flex gap-2 items-center">
-              <input value={openId} onChange={(e) => setOpenId(e.target.value)} className="h-11 flex-1 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area" placeholder="Enter question ID" />
-              <button onClick={()=> openId && openQuestion(openId)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
+        <div ref={aboveRef}>
+          <RegistrationPrompt view="questions" className="mb-6" />
+          {loading && <p className="font-area ch-subtext">Loading…</p>}
+          {err && <p className="text-red-400 font-area">{err}</p>}
+          {note && <p className="font-area ch-subtext">{note}</p>}
+          {note && (
+            <div className="mt-4 grid gap-2">
+              <div className="flex gap-2 items-center">
+                <input value={openId} onChange={(e) => setOpenId(e.target.value)} className="h-11 flex-1 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area" placeholder="Enter question ID" />
+                <button onClick={()=> openId && openQuestion(openId)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
   <div ref={listRef} className="questions-scroll mt-4 pr-1 overflow-y-auto" style={{ height: listHeight }}>
           {questions.length > 0 && (
