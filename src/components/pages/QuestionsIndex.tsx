@@ -9,6 +9,7 @@ import PhaseHeader from "@/components/PhaseHeader";
 import PhaseTimer from "@/components/PhaseTimer";
 import { useAppStore } from "@/store/appStore";
 import RegistrationPrompt from "@/components/RegistrationPrompt";
+import { readDemoState } from "@/lib/demoLocal";
 
 const QuestionDetail = dynamic(() => import("@/components/pages/QuestionDetail"), { ssr: false });
 
@@ -22,6 +23,9 @@ export default function QuestionsIndex() {
   const [openId, setOpenId] = useState("");
   const [phaseInfo, setPhaseInfo] = useState<{ phase?: number; next?: string } | null>(null);
   const { guestMode, questionId, openQuestion, closeQuestion } = useAppStore() as any;
+  const [demoPoints, setDemoPoints] = useState(0);
+  const [demoSolvedCount, setDemoSolvedCount] = useState(0);
+  const [demoSolvedIds, setDemoSolvedIds] = useState<string[]>([]);
   const listRef = useRef<HTMLDivElement | null>(null);
   const aboveRef = useRef<HTMLDivElement | null>(null);
   const [listHeight, setListHeight] = useState<number | undefined>(undefined);
@@ -84,6 +88,23 @@ export default function QuestionsIndex() {
     return () => { mounted = false; };
   }, [initialized, user]);
 
+  // Demo HUD state + live updates
+  useEffect(() => {
+    if (!guestMode) return;
+    const s = readDemoState();
+  setDemoPoints(s.points || 0);
+  setDemoSolvedCount(s.solved?.length || 0);
+  setDemoSolvedIds(s.solved || []);
+    const onDemo = (e: any) => {
+      const st = readDemoState();
+    setDemoPoints(st.points || 0);
+    setDemoSolvedCount(st.solved?.length || 0);
+    setDemoSolvedIds(st.solved || []);
+    };
+    window.addEventListener('ch-demo-progress', onDemo as any);
+    return () => window.removeEventListener('ch-demo-progress', onDemo as any);
+  }, [guestMode]);
+
   return (
     <div className="min-h-dvh ch-bg relative">
       <div className="absolute inset-0 opacity-30 pointer-events-none select-none" style={{ backgroundImage: "url('/images/bgworldmap.svg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'top center' }} />
@@ -101,8 +122,14 @@ export default function QuestionsIndex() {
         {guestMode && (
           <div className="grid gap-3 mb-6">
             <div className="rounded-2xl p-4 ch-card ch-card--outlined" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-              <h2 className="font-qurova ch-gradient-text ch-h3 mb-1">Cryptic Hunt Starts Soon</h2>
-              <p className="font-area ch-subtext text-sm">The hunt begins on <strong className="font-qurova" style={{ color: '#F5753B' }}>26 Sept 2025</strong>. Explore this demo interface meanwhile.</p>
+              <div className="flex items-center justify-between gap-3 mb-1">
+                <h2 className="font-qurova ch-gradient-text ch-h3">Cryptic Hunt Starts Soon</h2>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 font-qurova text-white/90">Points: <span style={{color:'#F5753B'}}>{demoPoints}</span></span>
+                  <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 font-qurova text-white/90">Solved: {demoSolvedCount}</span>
+                </div>
+              </div>
+              <p className="font-area ch-subtext text-sm">The hunt begins on <strong className="font-qurova" style={{ color: '#F5753B' }}>26 Sept 2025</strong>. Explore the demo meanwhile.</p>
             </div>
           </div>
         )}
@@ -135,12 +162,20 @@ export default function QuestionsIndex() {
                       })()}
                     </p>
                   </div>
-                  <button onClick={()=> openQuestion(q.id)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
+                  {guestMode ? (
+                    demoSolvedIds.includes(q.id) ? (
+                      <span className="font-qurova" style={{ color: '#22c55e' }}>Completed</span>
+                    ) : (
+                      <button onClick={()=> openQuestion(q.id)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
+                    )
+                  ) : (
+                    <button onClick={()=> openQuestion(q.id)} className="px-4 py-2 rounded-xl font-qurova ch-btn">Open</button>
+                  )}
                 </li>
               ))}
             </ul>
           )}
-          {solved.length > 0 && (
+          {!guestMode && solved.length > 0 && (
             <div className="mt-8">
               <h3 className="font-qurova ch-text mb-2">Solved</h3>
               <ul className="grid gap-3">

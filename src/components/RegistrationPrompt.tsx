@@ -53,7 +53,7 @@ const PROMPTS: Partial<Record<AppView | 'default', PromptCopy>> = {
   faq: {
     badge: 'Quick heads-up',
     title: 'The full experience is 60 seconds away.',
-    body: 'Register and we handle team matching, clue pings, and campus check-ins so you can focus on solving.',
+    body: 'Register and we handle team matching and onboarding so you can focus on solving.',
     cta: 'Register now',
     icon: '/images/faqMascot.svg',
   },
@@ -97,9 +97,10 @@ type Props = {
   view?: AppView | 'default';
   className?: string;
   align?: 'left' | 'center';
+  allowMarketing?: boolean;
 };
 
-export default function RegistrationPrompt({ view: overrideView, className = '', align = 'left' }: Props) {
+export default function RegistrationPrompt({ view: overrideView, className = '', align = 'left', allowMarketing = false }: Props) {
   const { view, guestMode } = useAppStore();
   const pathname = usePathname();
   const resolvedView = useMemo<AppView | 'default'>(
@@ -124,7 +125,8 @@ export default function RegistrationPrompt({ view: overrideView, className = '',
   }, [storageKey, guestMode]);
 
   if (!prompt) return null;
-  const shouldShow = guestMode && pathname?.startsWith('/hunt');
+  const isHuntRoute = pathname?.startsWith('/hunt');
+  const shouldShow = guestMode && (isHuntRoute || allowMarketing);
   if (!shouldShow || dismissed) return null;
 
   const alignmentClasses = align === 'center'

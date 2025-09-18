@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useAppStore } from "@/store/appStore";
 import QRScannerOverlay from "@/components/QRScannerOverlay";
 import NFCScannerOverlay from "@/components/NFCScannerOverlay";
+import { readDemoState, addDemoSolve } from "@/lib/demoLocal";
 
 const SUBMISSIONS_CLOSED = false;
 
@@ -28,11 +29,13 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
   const [busy, setBusy] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showIncorrect, setShowIncorrect] = useState(false);
+  const [demoPoints, setDemoPoints] = useState<number>(0);
   const [scanOpen, setScanOpen] = useState(false);
   const [nfcOpen, setNfcOpen] = useState(false);
   const { setHideNav, guestMode } = useAppStore() as any;
 
   useEffect(() => { setHideNav(true); return () => setHideNav(false); }, [setHideNav]);
+  useEffect(() => { if (guestMode) { const s = readDemoState(); setDemoPoints(s.points || 0); } }, [guestMode]);
 
   const refresh = async () => {
     setErr(null); setSubmitMsg(null); setPoints(null); setLoading(true);
@@ -77,6 +80,10 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
         await refresh();
         setLastCorrect(true);
   setShowSuccess(true);
+        if (guestMode) {
+          const next = addDemoSolve(id, Number.isFinite(ptsNum as number) ? (ptsNum as number) : 0);
+          setDemoPoints(next.points);
+        }
   if (process.env.NODE_ENV === 'development') fireConfetti();
       }
     } catch (e) {
@@ -107,7 +114,11 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
         const ptsRaw = rData.points; const ptsNum = typeof ptsRaw === 'number' ? ptsRaw : (typeof ptsRaw === 'string' ? parseInt(ptsRaw, 10) : null);
         setPoints(Number.isFinite(ptsNum as number) ? (ptsNum as number) : null);
         setSubmitMsg(Number.isFinite(ptsNum as number) ? "Correct! Points awarded." : "Correct!");
-  await refresh(); setLastCorrect(true); setShowSuccess(true);
+        await refresh(); setLastCorrect(true); setShowSuccess(true);
+        if (guestMode) {
+          const next = addDemoSolve(id, Number.isFinite(ptsNum as number) ? (ptsNum as number) : 0);
+          setDemoPoints(next.points);
+        }
   if (process.env.NODE_ENV === 'development') fireConfetti();
       }
     } catch (e) {
@@ -123,7 +134,12 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
           <button onClick={() => { if (onClose) onClose(); else router.back(); }} aria-label="Back" className="rounded-full p-2 hover:opacity-90">
             <img src="/images/QuestionsPage/left-arrow.svg" alt="Back" className="w-5 h-5" />
           </button>
-          <h1 className="font-qurova ch-gradient-text ch-h3">{data?.question_name || "Question"}</h1>
+          <h1 className="font-qurova ch-gradient-text ch-h3 flex-1">{data?.question_name || "Question"}</h1>
+          {guestMode && (
+            <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-qurova text-white/90">
+              Demo Points: <span style={{color:'#F5753B'}}>{demoPoints}</span>
+            </div>
+          )}
         </div>
         {loading && <p className="font-area ch-subtext">Loading…</p>}
         {err && <p className="text-red-400 font-area">{err}</p>}
@@ -135,7 +151,7 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
             <div className="grid gap-2">
               <label className="font-area ch-subtext text-sm">Your Answer</label>
               {SUBMISSIONS_CLOSED && <p className="font-area text-amber-300 text-sm">Submissions are currently closed.</p>}
-              <input disabled={SUBMISSIONS_CLOSED} value={answer} onChange={(e) => setAnswer(e.target.value)} className="h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area disabled:opacity-60" placeholder="Type answer" />
+              <input disabled={SUBMISSIONS_CLOSED} value={answer} onChange={(e) => setAnswer(e.target.value)} className={`h-11 rounded-xl px-4 bg-neutral-800 text-white outline-none font-area disabled:opacity-60 ${showIncorrect ? 'animate-[shake_300ms_ease-in-out]' : ''}`} placeholder="Type answer" onAnimationEnd={() => setShowIncorrect(false)} />
               <div className="flex gap-2">
                 <button disabled={SUBMISSIONS_CLOSED} onClick={submit} className="h-11 rounded-xl font-qurova ch-btn flex-1">Submit</button>
                 {!guestMode && (
@@ -172,7 +188,10 @@ export default function QuestionDetail({ id: propId, onClose }: { id?: string; o
         </div>
       </Modal>
       <Modal open={showIncorrect} onClose={()=>setShowIncorrect(false)} title="Try again">
-        <p className="font-area ch-text">{submitMsg || "That doesn’t match. Check the question again! Ensure no spaces in the answer."}</p>
+        <div className="font-area ch-text space-y-2">
+          <p>{submitMsg || "That doesn’t match. Check the question again! Ensure no spaces in the answer."}</p>
+          <p className="text-sm ch-subtext">Tip: answers ignore spaces and case in demo mode.</p>
+        </div>
       </Modal>
     </div>
   );

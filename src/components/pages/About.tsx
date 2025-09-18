@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
+const RegistrationPrompt = dynamic(() => import('../RegistrationPrompt'), { ssr: false });
 
 export default function AboutPage() {
   return (
@@ -23,9 +26,10 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <section className="relative">
+        <section className="relative space-y-6">
+          <RegistrationPrompt view="about" allowMarketing className="max-w-xl" align="left" />
           {/* Subdued glass card inspired by RegistrationPrompt */}
-          <div className="relative overflow-hidden rounded-3xl border border-white/12 bg-white/8 p-6 sm:p-10 backdrop-blur-md shadow-[0_12px_34px_rgba(8,4,20,0.28)]">
+          <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10">
             {/* Subtle background pattern */}
             <div
               aria-hidden
@@ -46,7 +50,7 @@ export default function AboutPage() {
 
             <div className="relative mx-auto max-w-5xl space-y-12">
               <div className="space-y-7 text-left">
-              <span className="inline-flex items-center gap-2 self-center rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-qurova uppercase tracking-[0.3em] text-white/80 lg:self-start">
+              {/* <span className="inline-flex items-center gap-2 self-center rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-qurova uppercase tracking-[0.3em] text-white/80 lg:self-start">
                 Join The Hunt
               </span>
                 <h2 className="font-qurova text-3xl text-white sm:text-4xl">
@@ -54,7 +58,7 @@ export default function AboutPage() {
                 </h2>
                 <p className="font-area text-base leading-relaxed text-white/80 sm:text-lg max-w-3xl">
                   Assemble your dream team, unlock exclusive puzzles, and race other seekers across VIT. Spots fill up fast every year, so lock in your registration now and start planning your winning strategy.
-                </p>
+                </p> */}
               {/* <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex items-start gap-4 rounded-2xl bg-white/10 p-4 backdrop-blur-sm sm:p-5 lg:p-6">
                   <img src="/images/map.svg" alt="Campus map icon" className="mt-1 h-9 w-9 sm:h-10 sm:w-10 lg:h-12 lg:w-12" />
