@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import api from "@/lib/api";
+import { demoStartDate } from "@/lib/demoConfig";
 import type { MainGeneric } from "@/lib/types";
 
 type PhaseState = {
@@ -26,8 +27,7 @@ export function PhaseProvider({ children }: { children: React.ReactNode }) {
     const p = (async () => {
       try {
         if (guestMode) {
-          const start = new Date('2025-09-26T00:00:00.000Z').getTime();
-            // Use user's local time to determine state
+          const start = demoStartDate.getTime();
           const now = Date.now();
           if (now < start) {
             setStatus('PHASE_NOT_STARTED');
