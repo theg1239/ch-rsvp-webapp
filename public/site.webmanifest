@@ -9,13 +9,13 @@
   "description": "Cryptic Hunt by ACM-VIT",
   "icons": [
     {
-      "src": "/images/owl.png",
+      "src": "/512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/images/owl.png",
+      "src": "/192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"

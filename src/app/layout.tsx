@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   title: "🦉 CH Demo | ACM-VIT",
   description: "Try out Cryptic Hunt by ACM-VIT",
   manifest: "/site.webmanifest",
+  openGraph: {
+    images: ["/opengraph.png"],
+  },
 };
 
 export default function RootLayout({
