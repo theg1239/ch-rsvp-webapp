@@ -21,7 +21,21 @@ export const metadata: Metadata = {
   title: "🦉 CH Demo | ACM-VIT",
   description: "Try out Cryptic Hunt by ACM-VIT",
   manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+  },
   openGraph: {
+    title: "🦉 CH Demo | ACM-VIT",
+    description: "Try out Cryptic Hunt by ACM-VIT",
+    images: ["/opengraph.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "🦉 CH Demo | ACM-VIT",
+    description: "Try out Cryptic Hunt by ACM-VIT",
     images: ["/opengraph.png"],
   },
 };
