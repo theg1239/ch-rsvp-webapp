@@ -1,7 +1,7 @@
 import { getIdToken } from "../lib/firebase";
 import { demoQuestions, demoAnnouncements, demoLeaderboard, evaluateDemoAnswer } from "./demoConfig";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ch.acm.today";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://dev.cryptichunt.in";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
